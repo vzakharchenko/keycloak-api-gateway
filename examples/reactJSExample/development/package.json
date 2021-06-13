@@ -6,8 +6,8 @@
   "scripts": {
     "start": "SKIP_PREFLIGHT_CHECK=true craco start",
     "build": "SKIP_PREFLIGHT_CHECK=true craco build",
-    "lint": "eslint src --ext .ts src",
-    "lint:fix": "eslint --fix src --ext .ts"
+    "lint": "eslint src --ext .tsx src",
+    "lint:fix": "eslint --fix src --ext .tsx"
   },
   "author": "",
   "license": "ISC",
