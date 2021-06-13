@@ -177,3 +177,8 @@ where
 }
 
 ```
+
+# Configuration for Multi-Tenant Application
+TODO
+# Configuration for Cross-Tenant Application
+TODO

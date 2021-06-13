@@ -180,7 +180,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
           } else {
             next();
           }
-          return token;
+          return;
         } catch (e) {
                     // eslint-disable-next-line no-console
           console.log(`Error: ${e}`);

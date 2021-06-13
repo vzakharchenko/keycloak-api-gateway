@@ -5,7 +5,7 @@ import {
   getCustomPageHandler,
   getKeycloakJsonFunction,
   getSessionName,
-  KeycloakState
+  KeycloakState,
 } from "../utils/KeycloakUtils";
 
 const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
@@ -76,7 +76,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
       } else {
         next();
       }
-      return token;
+      return;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(`Error: ${e}`);
