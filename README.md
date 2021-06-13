@@ -22,16 +22,16 @@ npm i keycloak-api-gateway -S
 ```
 
 **Import Adapter**
-```
+```js
 import { KeycloakApiGateWayAdapter } = require('ccccccveldbrflkbjjkfgntjiuffgneehhkkhdbvhinn
 ');
 ```
 or
-```
+```js
 const { KeycloakApiGateWayAdapter } = require('keycloak-api-gateway/dist');
 ```
 
-```
+```js
 const keycloakApiGateWayAdapter = new KeycloakApiGateWayAdapter(
 {
   "defaultAdapterOptions": AUTHENTICATION AND AUTHORIZATION OPTIONS,
@@ -52,7 +52,7 @@ const keycloakApiGateWayAdapter = new KeycloakApiGateWayAdapter(
 
  - **[AWS Lambda@edge](https://aws.amazon.com/ru/lambda/edge/) middleWare**
 
-```
+```js
 module.exports.handler =
     async (awsEvent) => {
       return await keycloakApiGateWayAdapter
@@ -64,7 +64,7 @@ module.exports.handler =
 
  - **[ExpressJS](https://www.npmjs.com/package/express) Server**
 
-```
+```js
 const middlewareServer = express();
 middlewareServer.use(cookieParser());
 middlewareServer.use(async (req, res, next) => {
@@ -79,7 +79,7 @@ middlewareServer.listen(8080, () => {
 
  - **[https://www.npmjs.com/package/@craco/craco](https://www.npmjs.com/package/@craco/craco) Development Server**
 [craco.config.js](./development/craco.config.js)
-```
+```js
 
 module.exports = {
     devServer: (devServerConfig) => {
@@ -91,7 +91,7 @@ module.exports = {
 
  - **[Webpack](https://www.npmjs.com/package/webpack) Development Server**
 
-```
+```js
 
 const config = {
     mode: env,
@@ -108,7 +108,7 @@ module.exports = config;
 
 # KeycloakApiGateWayAdapter OPTIONS
 
-```
+```js
     multiTenantJson: (tenant: string)=>{
            return KeycloakJSONForTenant(tenant)
     };
@@ -135,9 +135,9 @@ where
  - **storageTypeSettings** configuration for storageType
  - keys RSA keys which can be used for sign/verify sessionId and also can be used for "Signed JWT" client authentication
 
-# Protect/UnProtect static Resource
+# Protect/unProtect static Resource
 
-```
+```js
 import { PublicUrlPageHandler } from "keycloak-api-gateway/dist/utils/DefaultPageHandlers";
 ...
 keycloakApiGateWayAdapter.addCustomPageHandler(new SingleTenantUrlPageHandler('/singleUrl'),)
@@ -149,8 +149,13 @@ where
 - **SingleTenantUrlPageHandler** - require single tenant authentication
 - **MultiTenantUrlPageHandler** - require multi-tenant authentication
 
-# Configuration for Single-Tenant Application
+# RSA Keys Generation 
 ```
+openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=clientId" -keyout server.key -out server.crt
+```
+
+# Configuration for Single-Tenant Application
+```json
 {
   "defaultAdapterOptions": {
     "keycloakJson": {
