@@ -2,9 +2,13 @@ import {v4} from 'uuid';
 
 import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken, SessionToken} from "../session/SessionManager";
-import {getCurrentHost, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
-
-import {DefaultTenant, Tenant} from "./Tenant";
+import {
+  getCurrentHost,
+  getCustomPageHandler,
+  getSessionName,
+  isProtectedByAccessLevel,
+  KeycloakState,
+} from "../utils/KeycloakUtils";
 
 const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
 const {awsAdapter} = require('keycloak-lambda-authorizer/src/apigateway/apigateway');
@@ -54,6 +58,8 @@ export class HeaderTenantSelectorType implements MultiTenantSelectorType {
 export interface MultiTenantAdapter {
     isTenantRoute(req: RequestObject): Promise<boolean>;
 
+    isMultiTenant(req: RequestObject): Promise<boolean>;
+
     redirectTenantLogin(req: RequestObject, res: ResponseObject,
                         realm: string, redirectUrl: string): Promise<void>
 
@@ -62,14 +68,21 @@ export interface MultiTenantAdapter {
 
 export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
   private options: Options;
-  private tenantToken: Tenant;
 
   constructor(options: Options) {
     this.options = options;
     if (!options.multiTenantOptions) {
       throw new Error('multiTenantOptions is not defined');
     }
-    this.tenantToken = new DefaultTenant();
+  }
+
+  async isMultiTenant(req: RequestObject): Promise<boolean> {
+    const sessionToken = getSessionToken(
+            req.cookies[getSessionName(this.options)], true,
+);
+    return (await this.isTenantRoute(req)) ||
+            isProtectedByAccessLevel('multi-tenant', req, this.options) ||
+            (sessionToken != null && sessionToken.multiFlag);
   }
 
   async isTenantRoute(req: RequestObject): Promise<boolean> {
@@ -160,13 +173,14 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
           const accessToken = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
           const tok = getSessionToken(accessToken.access_token, true);
           const token = await this.tenantCheckToken(res, sessionToken, tok);
-                    // get Access token
-          if (await this.tenantToken.isToken(req)) {
-            await this.tenantToken.getActiveToken(req, res, token);
-            return;
+          const customPageHandler = await getCustomPageHandler('multi-tenant',
+              req, this.options);
+          if (customPageHandler) {
+            await customPageHandler.execute(token, req, res, next);
+          } else {
+            next();
           }
-                    // success Tenant login
-          next();
+          return token;
         } catch (e) {
                     // eslint-disable-next-line no-console
           console.log(`Error: ${e}`);

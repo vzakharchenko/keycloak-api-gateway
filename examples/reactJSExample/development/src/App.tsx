@@ -24,7 +24,6 @@ export default class App extends React.Component {
             const tokenString = await fetchData('/token', 'GET', {});
             const accessToken = JSON.parse(tokenString).activeToken;
             this.state.jwt = accessToken;
-            debugger;
             this.setState({
                 token: decode(accessToken),
                 jwt: accessToken,

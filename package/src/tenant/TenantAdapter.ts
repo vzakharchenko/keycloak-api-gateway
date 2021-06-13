@@ -1,7 +1,12 @@
 import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken, SessionToken} from "../session/SessionManager";
-import {getCurrentHost, getKeycloakJsonFunction, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
-import {DefaultTenant, Tenant} from "../multitenants/Tenant";
+import {
+  getCurrentHost,
+  getCustomPageHandler,
+  getKeycloakJsonFunction,
+  getSessionName,
+  KeycloakState
+} from "../utils/KeycloakUtils";
 
 const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
 const {awsAdapter} = require('keycloak-lambda-authorizer/src/apigateway/apigateway');
@@ -14,10 +19,9 @@ export interface TenantAdapter {
 
 export class DefaultTenantAdapter implements TenantAdapter {
   options: Options;
-  tenantToken:Tenant;
+
   constructor(options: Options) {
     this.options = options;
-    this.tenantToken = new DefaultTenant();
   }
 
   async tenantCheckToken(res: ResponseObject, sessionToken: SessionToken, tok: any): Promise<any> {
@@ -65,12 +69,14 @@ export class DefaultTenantAdapter implements TenantAdapter {
     try {
       const tok = await sessionManager.getSessionAccessToken(sessionToken);
       const token = await this.tenantCheckToken(res, sessionToken, tok);
-      // get Access token
-      if (await this.tenantToken.isToken(req)) {
-        await this.tenantToken.getActiveToken(req, res, token);
-        return;
+      const customPageHandler = await getCustomPageHandler('single',
+          req, this.options);
+      if (customPageHandler) {
+        await customPageHandler.execute(token, req, res, next);
+      } else {
+        next();
       }
-      next();
+      return token;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(`Error: ${e}`);

@@ -87,27 +87,40 @@ export class DefaultLambdaEdgeAdapter implements LambdaEdgeAdapter {
     const next: any = () => {
       state = true;
     };
-    await this.apiGateway.middleware(req, response, next);
-    const responseData: any = {
-      status: response.statusCode,
-      body: response.body,
-    };
-    responseData.headers = {};
-    Object.entries(response.headers).forEach((kv) => {
-      const key = kv[0];
-      const value: any = kv[1];
-      const res = value.map((v: any) => ({
-        key, value: v,
-      }));
-      responseData.headers[key] = res;
-      return res;
-    });
-    delete responseData.headers['x-powered-by'];
-    delete responseData.headers['content-length'];
-    delete responseData.headers['transfer-encoding'];
-    delete responseData.headers.via;
-    delete responseData.headers.warning;
-    return state ? event.Records[0].cf.request : responseData;
+    try {
+      await this.apiGateway.middleware(req, response, next);
+      const responseData: any = {
+        status: response.statusCode,
+        body: response.body,
+      };
+      responseData.headers = {};
+      Object.entries(response.headers).forEach((kv) => {
+        const key = kv[0];
+        const value: any = kv[1];
+        const res = value.map((v: any) => ({
+          key, value: v,
+        }));
+        responseData.headers[key] = res;
+        return res;
+      });
+      delete responseData.headers['x-powered-by'];
+      delete responseData.headers['content-length'];
+      delete responseData.headers['transfer-encoding'];
+      delete responseData.headers.via;
+      delete responseData.headers.warning;
+      return state ? event.Records[0].cf.request : responseData;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(`Error ${e.message}`);
+      // eslint-disable-next-line no-console
+      console.log(`ErrorObject ${e}`);
+      return {
+        status: 500,
+        body: e.message,
+      };
+    }
+
+
   }
 
 }

@@ -4,8 +4,10 @@ import {DefaultJWKS} from "../jwks/JWKS";
 import {DefaultCallback} from "../callback/Callback";
 import {DefaultMultiTenantAdapter} from "../multitenants/Multi-tenant-adapter";
 import {DefaultTenantAdapter} from "../tenant/TenantAdapter";
-import {StrorageDB} from "../session/storage/Strorage";
-import {Options, RequestObject, ResponseObject} from "../index";
+import {Options, PageHandlers, RequestObject, ResponseObject} from "../index";
+import {DynamoDbSettings} from "../session/storage/DynamoDB";
+import {isProtectedByAccessLevel} from "../utils/KeycloakUtils";
+import {PublicUrlPageHandler, TokenPageHandler} from "../utils/DefaultPageHandlers";
 
 
 export type APIGateWayOptions = {
@@ -14,7 +16,9 @@ export type APIGateWayOptions = {
     multiTenantAdapterOptions?: any; // todo
     // eslint-disable-next-line no-warning-comments, line-comment-position
     defaultAdapterOptions?: any; // todo
+    pageHandlers?: PageHandlers;
     storageType: string,
+    storageTypeSettings?: DynamoDbSettings | any
     keys: SessionTokenKeys,
 }
 
@@ -53,6 +57,16 @@ export class DefaultApiGateway implements ApiGateway {
         this.useMultiTenant = true;
       }
     }
+    if (!this.options.pageHandlers || this.options.pageHandlers.length === 0) {
+      this.options.pageHandlers = [
+        new PublicUrlPageHandler('(.*)(/public)(.*)'),
+        new PublicUrlPageHandler('(.*)(.(jpg|jpeg|png|gif|bmp))'),
+        new PublicUrlPageHandler('(.*)(.(ico|tiff))'),
+        new PublicUrlPageHandler('(.*)(.(css))'),
+        new TokenPageHandler("/multi-token", 'multi-tenant'),
+        new TokenPageHandler("/token", 'single'),
+      ];
+    }
   }
 
   transform(opts: APIGateWayOptions): Options {
@@ -60,10 +74,12 @@ export class DefaultApiGateway implements ApiGateway {
       session: {
         sessionConfiguration: {
           storageType: opts.storageType,
+          storageTypeSettings: opts.storageTypeSettings,
           keys: opts.keys,
         },
       },
       defaultAdapterOptions: opts.defaultAdapterOptions,
+      pageHandlers: opts.pageHandlers,
     };
     if (opts.multiTenantAdapterOptions && opts.multiTenantJson) {
       options.multiTenantOptions = {
@@ -96,14 +112,21 @@ export class DefaultApiGateway implements ApiGateway {
       await this.options.jwks.jwks(request, response);
       return;
     }
+    if (this.options.callback.isCallBack(request)) {
 
+      await this.options.callback.callback(request, response);
+      return;
+    }
     if (this.options.callback.isCallBack(request)) {
       await this.options.callback.callback(request, response);
       return;
     }
-
-    if (this.options.callback.isCallBack(request)) {
-      await this.options.callback.callback(request, response);
+    if (isProtectedByAccessLevel('public', request, this.options)) {
+      next();
+      return;
+    }
+    if (isProtectedByAccessLevel('single', request, this.options)) {
+      await singleTenantAdapter.singleTenant(request, response, next);
       return;
     }
     if (this.useMultiTenant) {
@@ -111,7 +134,7 @@ export class DefaultApiGateway implements ApiGateway {
         throw new Error('multiTenantOptions does not defined');
       }
       const multiTenantAdapter = this.options.multiTenantOptions.multiTenantAdapter;
-      if (await multiTenantAdapter.isTenantRoute(request)) {
+      if (await multiTenantAdapter.isMultiTenant(request)) {
         await multiTenantAdapter.tenant(request, response, next);
       } else {
         await singleTenantAdapter.singleTenant(request, response, next);

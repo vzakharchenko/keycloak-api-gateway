@@ -5,8 +5,6 @@ import {Options, RequestObject} from "../index";
 import {getSessionName, KeycloakState} from "../utils/KeycloakUtils";
 
 import {StrorageDB} from "./storage/Strorage";
-import {InMemoryDB} from "./storage/InMemoryDB";
-import {DynamoDB, DynamoDbSettings} from "./storage/DynamoDB";
 
 const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 
@@ -15,7 +13,7 @@ export type SessionToken = {
     jti: string,
     email: string,
     exp: number,
-    multiFlag?: boolean,
+    multiFlag: boolean,
     // eslint-disable-next-line babel/camelcase
     session_state: string,
     sessionState: string,
@@ -50,7 +48,7 @@ export function getSessionToken(sessionTokenString: string,
 export type SessionConfiguration = {
     storageType: string,
     sessionCookieName?: string,
-    dynamoDbSettings?: DynamoDbSettings,
+    storageTypeSettings?: any,
     keys: SessionTokenKeys,
 }
 
@@ -82,25 +80,27 @@ export class DefaultSessionManager implements SessionManager {
     this.options = options;
   }
 
-  getCurrentStorage():StrorageDB{
-      switch (this.defaultSessionType.storageType) {
-          case 'InMemoryDB':{
-              return new InMemoryDB();
-          }
-          case 'DynamoDB': {
-              if (!this.options.session.sessionConfiguration.dynamoDbSettings){
-                  throw new Error('dynamoDbSettings setting does not defined');
-              }
-              return new DynamoDB(this.options.session.sessionConfiguration.dynamoDbSettings)
-          }
-          default: {
-              throw new Error(this.defaultSessionType.storageType + ' does not support')
-          }
+  async getCurrentStorage(): Promise<StrorageDB> {
+    switch (this.defaultSessionType.storageType) {
+      case 'InMemoryDB': {
+        const {InMemoryDB} = await import('./storage/InMemoryDB');
+        return new InMemoryDB();
       }
+      case 'DynamoDB': {
+        if (!this.options.session.sessionConfiguration.storageTypeSettings) {
+          throw new Error('dynamoDbSettings setting does not defined');
+        }
+        const {DynamoDB} = await import('./storage/DynamoDB');
+        return new DynamoDB(this.options.session.sessionConfiguration.storageTypeSettings);
+      }
+      default: {
+        throw new Error(`${this.defaultSessionType.storageType} does not support`);
+      }
+    }
   }
 
   async updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
-    await this.getCurrentStorage().updateSession(sessionId, email, externalToken);
+    await (await this.getCurrentStorage()).updateSession(sessionId, email, externalToken);
   }
 
   createJWS(sessionId: string) {
@@ -128,7 +128,7 @@ export class DefaultSessionManager implements SessionManager {
       email: accessToken.email,
       sessionState: accessToken.session_state,
     }, {keys: this.defaultSessionType.keys});
-    await this.getCurrentStorage()
+    await (await this.getCurrentStorage())
       .saveSession(sessionId,
                 accessToken.session_state,
                 refreshToken.exp,
@@ -141,7 +141,7 @@ export class DefaultSessionManager implements SessionManager {
     const token = session;
     const sessionId = token.jti;
     const {sessionState} = token;
-    const sessionValue = await this.getCurrentStorage().getSessionIfExists(sessionId);
+    const sessionValue = await (await this.getCurrentStorage()).getSessionIfExists(sessionId);
     if (sessionValue) {
       if (sessionValue.keycloakSession === sessionState) {
         return sessionValue.externalToken;

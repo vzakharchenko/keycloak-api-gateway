@@ -1,7 +1,8 @@
 import {ApiGateway, APIGateWayOptions, DefaultApiGateway} from "../apigateway/ApiGateway";
 import {Options} from "../index";
+import {ExpressMiddleWare} from "../../index";
 
-export class ExpressMiddleWare {
+export class DefaultExpressMiddleWare implements ExpressMiddleWare {
   private options: APIGateWayOptions | Options;
   private apiGateway: ApiGateway;
 

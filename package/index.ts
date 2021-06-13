@@ -1,18 +1,27 @@
-import {Options} from "./src";
-import {ExpressMiddleWare} from "./src/express/ExpressMiddleWare";
+import {CustomPageHandler, Options, PageHandler} from "./src";
 import {ApiGateway, APIGateWayOptions, DefaultApiGateway} from "./src/apigateway/ApiGateway";
-import {WebPackDevServerMiddleWare} from "./src/express/WebPackDevServerMiddleWare";
 import {DefaultLambdaEdgeAdapter} from "./src/lambdaedge/lambdaEdgeAdapter";
+import {WebPackDevServerMiddleWare} from "./src/express/DefaultWebPackDevServerMiddleWare";
+
+export interface ExpressMiddleWare {
+    middleWare(req: any, res: any, next: any): Promise<void>
+}
 
 export class KeycloakApiGateWayAdapter {
-    private options: APIGateWayOptions | Options;
+    readonly options: APIGateWayOptions | Options;
 
     constructor(options: APIGateWayOptions | Options) {
         this.options = options;
     }
 
-    expressMiddleWare(): ExpressMiddleWare {
-        return new ExpressMiddleWare(this.options);
+    addCustomPageHandler(customPageHandler: PageHandler | CustomPageHandler): KeycloakApiGateWayAdapter {
+        this.options.pageHandlers?.push(customPageHandler);
+        return this;
+    }
+
+    async expressMiddleWare(): Promise<ExpressMiddleWare> {
+        const {DefaultExpressMiddleWare} = await import("./src/express/DefaultExpressMiddleWare");
+        return new DefaultExpressMiddleWare(this.options);
     }
 
     apiGatewayMiddleWare(): ApiGateway {
@@ -23,8 +32,7 @@ export class KeycloakApiGateWayAdapter {
         return new DefaultLambdaEdgeAdapter(this.apiGatewayMiddleWare());
     }
 
-    webPackDevServerMiddleWare(devServerConfig: any): void {
-        new WebPackDevServerMiddleWare(devServerConfig, this.options)
-            .applyMiddleWare()
+    webPackDevServerMiddleWare(): any {
+        return new WebPackDevServerMiddleWare(this.options);
     }
 }
