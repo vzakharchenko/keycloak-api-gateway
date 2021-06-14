@@ -23,8 +23,7 @@ npm i keycloak-api-gateway -S
 
 **Import Adapter**
 ```js
-import { KeycloakApiGateWayAdapter } = require('ccccccveldbrflkbjjkfgntjiuffgneehhkkhdbvhinn
-');
+import { KeycloakApiGateWayAdapter } = require('keycloak-api-gateway/dist');
 ```
 or
 ```js
