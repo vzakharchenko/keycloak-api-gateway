@@ -4,70 +4,47 @@ import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken, SessionToken} from "../session/SessionManager";
 import {
   getCurrentHost,
-  getCustomPageHandler,
   getSessionName,
-  isProtectedByAccessLevel,
   KeycloakState,
 } from "../utils/KeycloakUtils";
 
 const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
-const {awsAdapter} = require('keycloak-lambda-authorizer/src/apigateway/apigateway');
+const {adapter} = require('keycloak-lambda-authorizer/src/keycloakAuthorizer');
 const {keycloakRefreshToken} = require('keycloak-lambda-authorizer/src/clientAuthorization');
+const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
 
-const manufacturerRoute = new RegExp(
-    '(^)(\\/|)(/tenants/(.*))(/$|(\\?|$))',
-    'g',
-);
-
-export interface MultiTenantSelectorType {
-    isTenantRoute(req: RequestObject, opts: Options): Promise<boolean> | boolean;
-
-    getTenantName(req: RequestObject, opts: Options): Promise<string> | string;
-}
-
-export class PathTenantSelectorType implements MultiTenantSelectorType {
-
-  getTenantName(req: RequestObject): string {
-    const parts = (req.baseUrl || req.originalUrl).split('/');
-    return parts[2];
-  }
-
-  isTenantRoute(req: RequestObject, opts: Options): boolean {
-    return Boolean((req.baseUrl || req.originalUrl).match(manufacturerRoute));
-  }
-}
-
-export class HeaderTenantSelectorType implements MultiTenantSelectorType {
-
-
-  getTenantName(req: RequestObject, opts: Options): string {
-    if (!opts.multiTenantOptions ||
-            !opts.multiTenantOptions.multiTenantSelectorOptions ||
-            !opts.multiTenantOptions.multiTenantSelectorOptions.headerName
-        ) {
-      throw new Error('Header Name is not defined');
-    }
-    return req.headers[opts.multiTenantOptions.multiTenantSelectorOptions.headerName];
-  }
-
-  isTenantRoute(req: RequestObject, opts: Options): boolean {
-    return Boolean(this.getTenantName(req, opts));
-  }
-}
-
+/**
+ * Multi-Tenant Adapter
+ */
 export interface MultiTenantAdapter {
-    isTenantRoute(req: RequestObject): Promise<boolean>;
 
+  /**
+   * Check current configuration support multi-tenancy
+   * @param req http Request
+   */
     isMultiTenant(req: RequestObject): Promise<boolean>;
 
+  /**
+   * If needed authentification redirect to Tenant login page
+   * @param req http request
+   * @param res  http response
+   * @param realm  tenant name
+   * @param redirectUrl where to return after logging in
+   */
     redirectTenantLogin(req: RequestObject, res: ResponseObject,
                         realm: string, redirectUrl: string): Promise<void>
 
+  /**
+   * adapter for specific tenant
+   * @param req http request
+   * @param res http response
+   * @param next allow request
+   */
     tenant(req: RequestObject, res: ResponseObject, next: any): Promise<any>
 }
 
 export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
-  private options: Options;
+  readonly options: Options;
 
   constructor(options: Options) {
     this.options = options;
@@ -80,35 +57,12 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     const sessionToken = getSessionToken(
             req.cookies[getSessionName(this.options)], true,
 );
-    return (await this.isTenantRoute(req)) ||
-            isProtectedByAccessLevel('multi-tenant', req, this.options) ||
-            (sessionToken != null && sessionToken.multiFlag);
-  }
-
-  async isTenantRoute(req: RequestObject): Promise<boolean> {
-    if (!this.options.multiTenantOptions ||
-            !this.options.multiTenantOptions.multiTenantSelectorType) {
-      throw new Error('multiTenantOptions is not defined');
-    }
-        // eslint-disable-next-line no-return-await
-    return await this.options.multiTenantOptions
-      .multiTenantSelectorType.isTenantRoute(req, this.options);
-  }
-
-  async getTenantName(req: RequestObject): Promise<string> {
-    if (!this.options.multiTenantOptions ||
-            !this.options.multiTenantOptions.multiTenantSelectorType) {
-      throw new Error('multiTenantOptions is not defined');
-    }
-        // eslint-disable-next-line no-return-await
-    return await this.options.multiTenantOptions
-      .multiTenantSelectorType.getTenantName(req, this.options);
+    return (sessionToken != null && sessionToken.multiFlag);
   }
 
   async redirectTenantLogin(req: RequestObject, res: ResponseObject,
                               realm: string, redirectUrl: string) {
-    if (!this.options.multiTenantOptions ||
-            !this.options.multiTenantOptions.multiTenantSelectorType) {
+    if (!this.options.multiTenantOptions) {
       throw new Error('multiTenantOptions is not defined');
     }
     const tenantRealmJson: any = this.options.multiTenantOptions.multiTenantJson(realm);
@@ -137,13 +91,13 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     const token = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
     if (token) {
       let returnToken;
-      const tenantOptions = {
-        ...this.options.multiTenantOptions.multiTenantAdapterOptions,
-        ...{keycloakJson: () => tenantRealmJson},
-      };
+      const tenantOptions = commonOptions(
+          this.options.multiTenantOptions.multiTenantAdapterOptions,
+        tenantRealmJson,
+      );
       try {
 
-        await awsAdapter.adapter(tok.token,
+        await adapter(tok.token, tenantOptions.keycloakJson,
                     tenantOptions);
         return token;
       } catch (e) {
@@ -158,40 +112,28 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
   }
 
   async tenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
-    const {redirectUrl} = req.query;
-    if (await this.isTenantRoute(req)) {
-      const realm = await this.getTenantName(req);
-      const redUrl = redirectUrl || '/';
-      await this.redirectTenantLogin(req, res, realm, redUrl);
-    } else {
-      const sessionToken = getSessionToken(req.cookies[getSessionName(this.options)], true);
-      if (sessionToken) {
-        try {
-          if (!this.options.session.sessionManager) {
-            throw new Error('sessionManager is not defined');
-          }
-          const accessToken = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
-          const tok = getSessionToken(accessToken.access_token, true);
-          const token = await this.tenantCheckToken(res, sessionToken, tok);
-          const customPageHandler = await getCustomPageHandler('multi-tenant',
-              req, this.options);
-          if (customPageHandler) {
-            await customPageHandler.execute(token, req, res, next);
-          } else {
-            next();
-          }
-          return;
-        } catch (e) {
-                    // eslint-disable-next-line no-console
-          console.log(`Error: ${e}`);
-          await this.redirectTenantLogin(req, res, await this.getTenantName(req), '/');
+
+    const sessionToken = getSessionToken(req.cookies[getSessionName(this.options)], true);
+    if (sessionToken) {
+      try {
+        if (!this.options.session.sessionManager) {
+          throw new Error('sessionManager is not defined');
         }
-      } else {
-                // eslint-disable-next-line no-console
-        console.log('error: vc is null');
-        res.redirect(302, '/');
+        const accessToken = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
+        const tok = getSessionToken(accessToken.access_token, true);
+        const token = await this.tenantCheckToken(res, sessionToken, tok);
+        return token;
+      } catch (e) {
+                    // eslint-disable-next-line no-console
+        console.log(`Error: ${e}`);
+        await this.redirectTenantLogin(req, res, <string>sessionToken.tenant, '/');
       }
+    } else {
+                // eslint-disable-next-line no-console
+      console.log('error: session is null');
+      res.redirect(302, '/');
     }
+    return null;
   }
 
 }

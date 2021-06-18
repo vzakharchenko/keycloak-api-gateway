@@ -1,19 +1,31 @@
 import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken, SessionToken} from "../session/SessionManager";
-import {
-  getCurrentHost,
-  getCustomPageHandler,
-  getKeycloakJsonFunction,
-  getSessionName,
-  KeycloakState,
-} from "../utils/KeycloakUtils";
+import {getCurrentHost, getKeycloakJsonFunction, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
 
 const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
 const {awsAdapter} = require('keycloak-lambda-authorizer/src/apigateway/apigateway');
 const {keycloakRefreshToken} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 
+/**
+ * single tenant adapter
+ */
 export interface TenantAdapter {
+
+    /**
+     * adapter for tenant
+     * @param req http request
+     * @param res http response
+     * @param next allow request
+     */
     singleTenant(req: RequestObject, res: ResponseObject, next: any): Promise<any>
+
+    /**
+     * If needed authentication redirect to Tenant login page
+     * @param req http request
+     * @param res  http response
+     * @param realm  tenant name
+     * @param redirectUrl where to return after logging in
+     */
     redirectTenantLogin(req: RequestObject, res: ResponseObject): Promise<void>
 }
 
@@ -48,7 +60,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
         returnToken = await keycloakRefreshToken(token, tenantOptions);
         await this.options.session.sessionManager.updateSession(
                     sessionToken.jti, sessionToken.email, returnToken,
-);
+                );
       }
       return returnToken;
     }
@@ -64,25 +76,18 @@ export class DefaultTenantAdapter implements TenantAdapter {
     const sessionToken = getSessionToken(req.cookies[getSessionName(this.options)], true);
     if (!sessionToken) {
       await this.redirectTenantLogin(req, res);
-      return;
+      return null;
     }
     try {
       const tok = await sessionManager.getSessionAccessToken(sessionToken);
       const token = await this.tenantCheckToken(res, sessionToken, tok);
-      const customPageHandler = await getCustomPageHandler('single',
-          req, this.options);
-      if (customPageHandler) {
-        await customPageHandler.execute(token, req, res, next);
-      } else {
-        next();
-      }
-      return;
+      return token;
     } catch (e) {
-      // eslint-disable-next-line no-console
+            // eslint-disable-next-line no-console
       console.log(`Error: ${e}`);
       await this.redirectTenantLogin(req, res);
     }
-
+    return null;
   }
 
   async redirectTenantLogin(req: RequestObject, res: ResponseObject): Promise<void> {

@@ -1,0 +1,23 @@
+
+<table border="1">
+    <caption>List Tenants</caption>
+    <tr>
+        <th>Tenant Name</th>
+        <th>Tenant Label</th>
+        <th>Select</th>
+    </tr>
+      {{#each tenants}}
+                    <tr>
+                        <td>{{name}}</td>
+                        <td>{{label}}</td>
+                        <td><button id="{{name}}" class="float-left submit-button" >Select</button>
+
+                            <script type="text/javascript">
+                                document.getElementById("{{name}}").onclick = function () {
+                                    location.href = "{{redirectUri}}";
+                                };
+                            </script></td>
+                    </tr>
+      {{/each}}
+</table>
+

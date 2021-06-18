@@ -39,7 +39,7 @@
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
     "aws-sdk": "^2.925.0",
-    "keycloak-lambda-authorizer": "^0.5.1",
+    "keycloak-lambda-authorizer": "^0.5.2",
     "uuid": "^8.3.2"
   },
   "optionalDependencies": {
@@ -47,5 +47,6 @@
     "cookie": "^0.4.1",
     "cookie-parser": "^1.4.5",
     "querystring": "^0.2.1"
-  }
+  },
+  "funding": "https://secure.wayforpay.com/button/b719a4043d286"
 }

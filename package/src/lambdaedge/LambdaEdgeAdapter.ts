@@ -7,7 +7,15 @@ import cookieParser from 'cookie-parser';
 import {getCurrentHost} from "../utils/KeycloakUtils";
 import {ApiGateway} from "../apigateway/ApiGateway";
 
+/**
+ * lambda@edge adapter handler
+ */
 export interface LambdaEdgeAdapter {
+
+  /**
+   * Lambda Handler
+   * @param event
+   */
     handler(event: any): Promise<any>;
 }
 

@@ -59,11 +59,31 @@ export type TokenType = {
     refresh_token: string,
 }
 
+/**
+ * Session Manager
+ */
 export interface SessionManager {
+
+    /**
+     * exchange  session Token to  Access Token
+     * @param session session token
+     */
     getSessionAccessToken(session: SessionToken): Promise<any>
 
+    /**
+     * update access and refresh tokens inside storage
+     * @param sessionId storageID
+     * @param email user email
+     * @param externalToken access and refresh tokens
+     */
     updateSession(sessionId: string, email: string, externalToken: any): Promise<void>;
 
+    /**
+     * Create storage record with access_token,refresh_token and return signed SessionToken
+     * @param req - http request
+     * @param state - keycloak session id
+     * @param token access_token and refresh_token
+     */
     createSession(req: RequestObject, state: KeycloakState, token: TokenType): Promise<any>
 }
 

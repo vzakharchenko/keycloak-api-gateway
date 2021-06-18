@@ -5,8 +5,19 @@ import {getCurrentHost, getSessionName, getTokenByCode, KeycloakState} from "../
 const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
 
 export interface Callback {
+
+  /**
+   * check the current request is oauth2.0 authentication callback
+   * @param request http request
+   * expected url path /callbacks/<Tenant>/<Tenant Client>/callback
+   */
     isCallBack(request: RequestObject): boolean;
 
+  /**
+   * oauth2.0 authentication callback
+   * @param req http request
+   * @param res http response
+   */
     callback(req: RequestObject, res: ResponseObject): Promise<void>;
 }
 

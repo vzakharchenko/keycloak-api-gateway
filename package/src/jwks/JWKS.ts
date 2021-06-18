@@ -2,9 +2,17 @@ import {Options, RequestObject, ResponseObject} from "../index";
 
 const {adapter} = require('keycloak-lambda-authorizer');
 
+/**
+ * JWKS endpoint for signed jwt request
+ */
 export interface JWKS {
     isJwksRoute(request: RequestObject): boolean;
 
+  /**
+   * return public key to verify SJWT
+   * @param req
+   * @param res
+   */
     jwks(req: RequestObject, res: ResponseObject): Promise<void>;
 }
 

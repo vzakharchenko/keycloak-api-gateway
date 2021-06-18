@@ -1,102 +1,77 @@
-import {AccessLevel, CustomHandlerType, CustomPageHandler, PageHandler, RequestObject, ResponseObject} from "../index";
+import {
+    Options,
+} from "../index";
+import {DefaultSessionManager} from "../session/SessionManager";
+import {APIGateWayOptions} from "../apigateway/ApiGateway";
+import {Logout} from "../logout/Logout";
+import {DefaultJWKS} from "../jwks/JWKS";
+import {DefaultCallback} from "../callback/Callback";
+import {DefaultTenantAdapter} from "../tenant/TenantAdapter";
+import {DefaultMultiTenantAdapter} from "../multitenants/Multi-tenant-adapter";
+import {TenantInternalPage} from "../handlers/TenantInternalPage";
+import {PublicUrlPageHandler} from "../handlers/PublicUrlPageHandler";
+import {TokenPageHandler} from "../handlers/TokenPageHandler";
+import {SingleTenantUrlPageHandler} from "../handlers/SingleTenantUrlPageHandler";
 
-export class PublicUrlPageHandler implements PageHandler {
+/**
+ * default Page Handler
+ */
+export const defaultPageHandlers = [
+  new TenantInternalPage('/tenants', 35000),
+  new PublicUrlPageHandler('(.*)(/public)(.*)', 10000),
+  new PublicUrlPageHandler('(.*)(.(jpg|jpeg|png|gif|bmp))', 10000),
+  new PublicUrlPageHandler('(.*)(.(ico|tiff))', 10000),
+  new PublicUrlPageHandler('(.*)(.(css))', 10000),
+  new TokenPageHandler("/token"),
+  new SingleTenantUrlPageHandler("/", 0),
+  new SingleTenantUrlPageHandler("/index.html", 32000),
+];
 
-  readonly url: string;
-
-  constructor(url: string) {
-    this.url = url;
+function transform(opts: APIGateWayOptions): Options {
+  const options: Options = {
+    session: {
+      sessionConfiguration: {
+        storageType: opts.storageType,
+        storageTypeSettings: opts.storageTypeSettings,
+        keys: opts.keys,
+      },
+    },
+    defaultAdapterOptions: opts.defaultAdapterOptions,
+    pageHandlers: opts.pageHandlers,
+  };
+  if (opts.multiTenantAdapterOptions && opts.multiTenantJson) {
+    options.multiTenantOptions = {
+      multiTenantJson: opts.multiTenantJson,
+      multiTenantAdapterOptions: opts.multiTenantAdapterOptions,
+    };
   }
-
-  getAccessLevel(): AccessLevel {
-    return 'public';
-  }
-
-  getUrl(): string {
-    return this.url;
-  }
-
-  customHandlerType(): CustomHandlerType {
-    return 'protection';
-  }
-
+  return options;
 }
 
-
-export class SingleTenantUrlPageHandler implements PageHandler {
-
-  readonly url: string;
-
-  constructor(url: string) {
-    this.url = url;
+export function initOptions(opts: APIGateWayOptions | Options): Options {
+  const options = (<any>opts).session ? <Options>opts : transform(<APIGateWayOptions>opts);
+  if (!options.logout) {
+    options.logout = new Logout(options);
   }
-
-  getAccessLevel(): AccessLevel {
-    return 'single';
+  if (!options.jwks) {
+    options.jwks = new DefaultJWKS(options);
   }
-
-  getUrl(): string {
-    return this.url;
+  if (!options.session.sessionManager) {
+    options.session.sessionManager = new DefaultSessionManager(options);
   }
-
-
-  customHandlerType(): CustomHandlerType {
-    return 'protection';
+  if (!options.callback) {
+    options.callback = new DefaultCallback(options);
   }
-}
-
-export class MultiTenantUrlPageHandler implements PageHandler {
-
-  readonly url: string;
-
-  constructor(url: string) {
-    this.url = url;
+  if (!options.singleTenantAdapter) {
+    options.singleTenantAdapter = new DefaultTenantAdapter(options);
   }
-
-  getAccessLevel(): AccessLevel {
-    return 'multi-tenant';
+  if (options.multiTenantOptions) {
+    if (!options.multiTenantOptions.multiTenantAdapter) {
+      options.multiTenantOptions.multiTenantAdapter = new DefaultMultiTenantAdapter(options);
+    }
   }
-
-  getUrl(): string {
-    return this.url;
+  if (!options.pageHandlers || options.pageHandlers.length === 0) {
+    options.pageHandlers = defaultPageHandlers;
   }
-
-
-  customHandlerType(): CustomHandlerType {
-    return 'protection';
-  }
-
-}
-
-export class TokenPageHandler implements CustomPageHandler {
-
-  readonly url: string;
-  readonly accessLevel: AccessLevel;
-
-  constructor(url: string,
-                accessLevel: AccessLevel) {
-    this.url = url;
-    this.accessLevel = accessLevel;
-  }
-
-  getAccessLevel(): AccessLevel {
-    return this.accessLevel;
-  }
-
-  getUrl(): string {
-    return this.url;
-  }
-
-  customHandlerType(): CustomHandlerType {
-    return 'executor';
-  }
-
-  execute(token: any,
-            req: RequestObject,
-            res: ResponseObject,
-          next:any): void {
-    const ret = {activeToken: token.access_token};
-    res.json(ret);
-  }
-
+  return options;
 }

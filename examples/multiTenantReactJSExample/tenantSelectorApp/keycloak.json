@@ -1,0 +1,12 @@
+{
+  "realm": "master",
+  "auth-server-url": "http://localhost:8090/auth/",
+  "ssl-required": "external",
+  "resource": "tenantSelectorApp",
+  "verify-token-audience": true,
+  "credentials": {
+    "secret": "bf9b590e-27ef-48f9-8a04-cefbefd0301e"
+  },
+  "confidential-port": 0,
+  "policy-enforcer": {}
+}

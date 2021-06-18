@@ -1,13 +1,9 @@
-import {DefaultSessionManager, SessionTokenKeys} from "../session/SessionManager";
-import {Logout} from "../logout/Logout";
-import {DefaultJWKS} from "../jwks/JWKS";
-import {DefaultCallback} from "../callback/Callback";
-import {DefaultMultiTenantAdapter} from "../multitenants/Multi-tenant-adapter";
-import {DefaultTenantAdapter} from "../tenant/TenantAdapter";
-import {Options, PageHandlers, RequestObject, ResponseObject} from "../index";
+import {getSessionToken, SessionTokenKeys} from "../session/SessionManager";
+import {Options, RequestObject, ResponseObject} from "../index";
 import {DynamoDbSettings} from "../session/storage/DynamoDB";
-import {isProtectedByAccessLevel} from "../utils/KeycloakUtils";
-import {PublicUrlPageHandler, TokenPageHandler} from "../utils/DefaultPageHandlers";
+import {getCustomPageHandler, getSessionName} from "../utils/KeycloakUtils";
+import {initOptions} from "../utils/DefaultPageHandlers";
+import {PageHandlers} from "../handlers/PageHandler";
 
 
 export type APIGateWayOptions = {
@@ -23,6 +19,13 @@ export type APIGateWayOptions = {
 }
 
 export interface ApiGateway {
+
+  /**
+   * Generic MiddleWare
+   * @param request - http request
+   * @param response - http response
+   * @param next - if executed then granted request
+   */
     middleware(request: RequestObject, response: ResponseObject, next?: any): Promise<void>
 }
 
@@ -32,62 +35,10 @@ export class DefaultApiGateway implements ApiGateway {
   useMultiTenant = false;
 
   constructor(opts: APIGateWayOptions | Options) {
-
-    this.options = (<any>opts).session ? <Options>opts : this.transform(<APIGateWayOptions>opts);
-    if (!this.options.logout) {
-      this.options.logout = new Logout(this.options);
+    this.options = initOptions(opts);
+    if (this.options.multiTenantOptions) {
+      this.useMultiTenant = true;
     }
-    if (!this.options.jwks) {
-      this.options.jwks = new DefaultJWKS(this.options);
-    }
-    if (!this.options.session.sessionManager) {
-      this.options.session.sessionManager = new DefaultSessionManager(this.options);
-    }
-    if (!this.options.callback) {
-      this.options.callback = new DefaultCallback(this.options);
-    }
-    if (!this.options.singleTenantAdapter) {
-      this.options.singleTenantAdapter = new DefaultTenantAdapter(this.options);
-    }
-    if (this.options.defaultAdapterOptions) {
-      if (this.options.multiTenantOptions) {
-        if (!this.options.multiTenantOptions.multiTenantAdapter) {
-          this.options.multiTenantOptions.multiTenantAdapter = new DefaultMultiTenantAdapter(this.options);
-        }
-        this.useMultiTenant = true;
-      }
-    }
-    if (!this.options.pageHandlers || this.options.pageHandlers.length === 0) {
-      this.options.pageHandlers = [
-        new PublicUrlPageHandler('(.*)(/public)(.*)'),
-        new PublicUrlPageHandler('(.*)(.(jpg|jpeg|png|gif|bmp))'),
-        new PublicUrlPageHandler('(.*)(.(ico|tiff))'),
-        new PublicUrlPageHandler('(.*)(.(css))'),
-        new TokenPageHandler("/multi-token", 'multi-tenant'),
-        new TokenPageHandler("/token", 'single'),
-      ];
-    }
-  }
-
-  transform(opts: APIGateWayOptions): Options {
-    const options: Options = {
-      session: {
-        sessionConfiguration: {
-          storageType: opts.storageType,
-          storageTypeSettings: opts.storageTypeSettings,
-          keys: opts.keys,
-        },
-      },
-      defaultAdapterOptions: opts.defaultAdapterOptions,
-      pageHandlers: opts.pageHandlers,
-    };
-    if (opts.multiTenantAdapterOptions && opts.multiTenantJson) {
-      options.multiTenantOptions = {
-        multiTenantJson: opts.multiTenantJson,
-        multiTenantAdapterOptions: opts.multiTenantAdapterOptions,
-      };
-    }
-    return options;
   }
 
   async middleware(request: RequestObject, response: ResponseObject, next?: any): Promise<void> {
@@ -121,26 +72,50 @@ export class DefaultApiGateway implements ApiGateway {
       await this.options.callback.callback(request, response);
       return;
     }
-    if (isProtectedByAccessLevel('public', request, this.options)) {
-      next();
+
+    let customPageHandler = await getCustomPageHandler('public',
+        request, this.options);
+    if (customPageHandler) {
+      await customPageHandler.execute(request, response, next, {options: this.options});
       return;
     }
-    if (isProtectedByAccessLevel('single', request, this.options)) {
-      await singleTenantAdapter.singleTenant(request, response, next);
-      return;
+
+    if (this.options.defaultAdapterOptions) {
+      customPageHandler = await getCustomPageHandler('single',
+          request, this.options);
+      if (customPageHandler) {
+        const sessionToken = getSessionToken(request.cookies[getSessionName(this.options)], true);
+
+        await customPageHandler.execute(request, response, next, {sessionToken, options: this.options});
+        return;
+      }
     }
+
     if (this.useMultiTenant) {
       if (!this.options.multiTenantOptions || !this.options.multiTenantOptions.multiTenantAdapter) {
         throw new Error('multiTenantOptions does not defined');
       }
+      customPageHandler = await getCustomPageHandler('multi-tenant',
+          request, this.options);
+      if (customPageHandler) {
+        const sessionToken = getSessionToken(request.cookies[getSessionName(this.options)], true);
+        await customPageHandler.execute(request, response, next, {sessionToken, options: this.options});
+        return;
+      }
+
       const multiTenantAdapter = this.options.multiTenantOptions.multiTenantAdapter;
       if (await multiTenantAdapter.isMultiTenant(request)) {
         await multiTenantAdapter.tenant(request, response, next);
-      } else {
-        await singleTenantAdapter.singleTenant(request, response, next);
+        return;
       }
-    } else {
-      await singleTenantAdapter.singleTenant(request, response, next);
     }
+
+    if (this.options.defaultAdapterOptions) {
+      await singleTenantAdapter.singleTenant(request, response, next);
+    } else {
+      throw new Error("Single tenant configuration does not defined");
+    }
+
+
   }
 }

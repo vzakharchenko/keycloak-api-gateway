@@ -1,6 +1,11 @@
 import {v4} from "uuid";
 
-import {AccessLevel, CustomPageHandler, Options, PageHandler, RequestObject} from "../index";
+import {AccessLevel,
+  Options,
+  RequestObject,
+  ResponseObject} from "../index";
+import {getSessionToken} from "../session/SessionManager";
+import {CustomPageHandlerContext, PageHandler} from "../handlers/PageHandler";
 
 const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
@@ -26,6 +31,7 @@ async function createJWS(options: any) {
   const keycloakJson = await options.keycloakJson(options);
   return {
     jti: v4(),
+    iss: keycloakJson.resource,
     sub: keycloakJson.resource,
     aud: `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}`,
     exp: timeSec + 30,
@@ -42,7 +48,7 @@ async function clientIdAuthorization(options: any) {
       authorization += `&client_secret=${secret}`;
     }
   } else if (options.keys && options.keys.privateKey) {
-    authorization += `&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer&client_assertion=${await clientJWT(await createJWS(options), options)}`;
+    authorization += `&client_assertion=${await clientJWT(await createJWS(options), options)}`;
   } else {
     throw new Error('Unsupported Credential Type');
   }
@@ -73,33 +79,53 @@ export function getSessionName(options: Options) {
   return options.session.sessionConfiguration.sessionCookieName;
 }
 
-export function isProtectedByAccessLevel(accessLevel: AccessLevel, request: RequestObject,
-                                         options: Options): boolean {
-  const currentUrl = request.baseUrl || request.originalUrl;
-  if (options.pageHandlers) {
-    return options.pageHandlers.find((pageHandler: PageHandler) => {
-      const url = pageHandler.getUrl();
-      const access = pageHandler.getAccessLevel();
-      return access === accessLevel &&
-                (currentUrl === url ||
-                    currentUrl.startsWith(url) ||
-                    currentUrl.match(url) != null);
-    }) != null;
+async function findPageHandler(accessLevel: AccessLevel,
+                               context :{
+                                   request: RequestObject,
+                                    options: Options
+}): Promise<PageHandler | null> {
+  const options = context.options;
+  const request = context.request;
+  if (!options.pageHandlers) {
+    return null;
   }
-  return false;
+  const currentUrl = request.baseUrl || request.originalUrl;
+  const sessionToken = getSessionToken(request.cookies[getSessionName(options)], true);
+
+  for (let i = 0; i < options.pageHandlers.length; i++) {
+    const pH = options.pageHandlers[i];
+    const url = pH.getUrl();
+    const pHAH = await pH.behavior(request, {sessionToken, options});
+    if (pHAH === accessLevel) {
+      if ((currentUrl === url ||
+                        currentUrl.startsWith(url)) ||
+                         currentUrl.match(url) != null) {
+        return pH;
+      }
+    }
+  }
+  return null;
 }
 
-export function getCustomPageHandler(accessLevel: AccessLevel, request: RequestObject,
-                                     options: Options): CustomPageHandler | null {
-  const currentUrl = request.baseUrl || request.originalUrl;
+export async function isCustomBehavior(accessLevel: AccessLevel,
+                                       context: {request: RequestObject
+                                       options: Options}): Promise<AccessLevel | null> {
+  if (context.options.pageHandlers) {
+    const pageHandler = await findPageHandler(accessLevel, context);
+    if (pageHandler) {
+      return accessLevel;
+    }
+  }
+  return null;
+}
+
+export async function getCustomPageHandler(accessLevel: AccessLevel, request: RequestObject,
+                                           options: Options): Promise<PageHandler | null> {
   if (options.pageHandlers) {
-    const currentPageHandler = options.pageHandlers.find((pageHandler: PageHandler) => {
-      const url = pageHandler.getUrl();
-      const access = pageHandler.getAccessLevel();
-      return pageHandler.customHandlerType() === 'executor' && access === accessLevel &&
-                (currentUrl === url || currentUrl.match(url) != null);
-    });
-    return <CustomPageHandler>currentPageHandler;
+    const currentPageHandler = await findPageHandler(accessLevel, {request, options});
+    if (currentPageHandler) {
+      return <PageHandler>currentPageHandler;
+    }
   }
   return null;
 }

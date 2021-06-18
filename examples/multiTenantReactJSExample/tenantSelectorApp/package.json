@@ -1,0 +1,28 @@
+{
+  "name": "tenant-selector-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint --quiet --ext .js index.js",
+    "lint:fix": "eslint --fix --quiet --ext .js index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vzakharchenko",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-config-airbnb": "*",
+    "eslint-plugin-import": "*"
+  },
+  "dependencies": {
+    "axios": "*",
+    "body-parser": "*",
+    "express": "*",
+    "express-handlebars": "*",
+    "jsonwebtoken": "*",
+    "path": "*",
+    "keycloak-lambda-authorizer": "*"
+  }
+}
