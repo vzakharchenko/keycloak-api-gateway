@@ -1,5 +1,5 @@
 # Example Multi-tenant expressjs/lambda-edge/devserver with tenant selector application
-
+![](../../imgs/slector-multi-tenant-keycloak-api-gateway.png)
 # Run Docker
 Using the image from https://hub.docker.com/r/jboss/keycloak/
 ```

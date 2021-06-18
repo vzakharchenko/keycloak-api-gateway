@@ -1,5 +1,5 @@
 # Example expressjs/lambda-edge/devserver
-
+![](../../imgs/keycloak-api-gateway.png)
 ## Development
 
 1. **Run Docker**
