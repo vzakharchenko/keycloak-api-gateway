@@ -8,33 +8,40 @@ import {getActiveToken} from "./TokenPageHandler";
  * External Page Context
  */
 export type TenantExternalPageContext = {
+
   /**
    * where to return after success authenticate
    */
     redirectedUrl: string,
+
   /**
    * application name
    * send as request param "app"
    */
     applicationName?: string,
+
   /**
    * Expected AccessLevel, by default 'multi-tenant'
    */
     defaultAccessLevel?: AccessLevel,
+
   /**
    * triggered access level
    * by default 'public'
    */
     sessionAccessLevel?: AccessLevel,
+
   /**
    * always redirect (skip checking sessionAccessLevel)
    */
     alwaysRedirect?: boolean,
+
   /**
    * redirect url
    */
     providePath?: boolean,
 }
+
 /**
  * Redirect to external Service to authenticate user
  *
@@ -113,7 +120,7 @@ export class TenantExternalPage implements PageHandler {
       const token = await getActiveToken(req, res, next, context);
       if (token) {
         next();
-        return;
+
       }
     } else {
       res.redirect(302, `${this.tenantExternalPage.redirectedUrl}?redirectUri=${getCurrentHost(req)}${this.tenantExternalPage.providePath
