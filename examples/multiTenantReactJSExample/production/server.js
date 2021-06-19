@@ -1,8 +1,8 @@
 const fs = require('fs');
 
 const express = require('express');
-
 const cookieParser = require('cookie-parser');
+
 const keycloakApiGateWayAdapter = require('./ApiConfig');
 
 const middlewareServer = express();
