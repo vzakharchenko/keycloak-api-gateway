@@ -11,7 +11,7 @@
   "dependencies": {
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
-    "keycloak-api-gateway": "../../../package"
+    "keycloak-api-gateway": "../../.."
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",

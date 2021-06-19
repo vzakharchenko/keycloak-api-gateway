@@ -48,10 +48,5 @@
     "cookie-parser": "^1.4.5",
     "querystring": "^0.2.1"
   },
-  "files": [
-    "../README.md",
-    "../LICENSE",
-    ".gitignore"
-  ],
   "funding": "https://secure.wayforpay.com/button/b719a4043d286"
 }

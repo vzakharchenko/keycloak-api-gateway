@@ -24,12 +24,20 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: cd package && npm i
-    - run: cd package && npm run lint
-    - run: cd package && npm run build
+    - run: npm i
+    - run: npm run lint
+    - run: npm run build
     - run: cd examples/reactJSExample/development && npm i
     - run: cd examples/reactJSExample/development && npm run lint
     - run: cd examples/reactJSExample/development && npm run build
     - run: cd examples/reactJSExample/production && npm i
     - run: cd examples/reactJSExample/production && npm run lint
     - run: cd examples/reactJSExample/production && npm run build
+    - run: cd examples/multiTenantReactJSExample/development && npm i
+    - run: cd examples/multiTenantReactJSExample/development && npm run lint
+    - run: cd examples/multiTenantReactJSExample/development && npm run build
+    - run: cd examples/multiTenantReactJSExample/production && npm i
+    - run: cd examples/multiTenantReactJSExample/production && npm run lint
+    - run: cd examples/multiTenantReactJSExample/production && npm run build
+    - run: cd examples/multiTenantReactJSExample/tenantSelectorApp && npm i
+    - run: cd examples/multiTenantReactJSExample/tenantSelectorApp && npm run lint
