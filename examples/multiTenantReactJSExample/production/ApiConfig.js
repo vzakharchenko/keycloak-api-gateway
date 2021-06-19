@@ -1,4 +1,4 @@
-const {TenantExternalPage} = require("keycloak-api-gateway/dist/src/handlers/DefaultPageHandlers");
+const {TenantExternalPage} = require("keycloak-api-gateway/dist/src/handlers/TenantExternalPage");
 const fs = require('fs');
 const adapter = require('keycloak-api-gateway/dist');
 
