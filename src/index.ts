@@ -38,7 +38,7 @@ export type MultiTenantOptions = {
 }
 export type SingleTenantOptions = {
     // eslint-disable-next-line no-warning-comments, line-comment-position
-    defaultAdapterOptions?: any;  // todo
+    defaultAdapterOptions?: any; // todo
     singleTenantAdapter?: TenantAdapter;
     idp?:string;
 }

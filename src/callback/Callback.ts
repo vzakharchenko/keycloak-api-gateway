@@ -60,8 +60,8 @@ export class DefaultCallback implements Callback {
         }, keycloakJson);
         sessionId = await this.options.session.sessionManager.createSession(req, state, token);
       } else {
-        if (!this.options.singleTenantOptions){
-          throw new Error('singleTenantOptions does not defined')
+        if (!this.options.singleTenantOptions) {
+          throw new Error('singleTenantOptions does not defined');
         }
         if (!this.options.singleTenantOptions.defaultAdapterOptions) {
           throw new Error('Default Adapter Options does not defined');

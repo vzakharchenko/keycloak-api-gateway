@@ -37,8 +37,8 @@ export class SingleTenantUrlPageHandler implements PageHandler {
   }
 
   async execute(req: RequestObject, res: ResponseObject, next: any, context: CustomPageHandlerContext): Promise<void> {
-    if (!context.options.singleTenantOptions){
-      throw new Error('singleTenantOptions does not defined')
+    if (!context.options.singleTenantOptions) {
+      throw new Error('singleTenantOptions does not defined');
     }
     const singleTenantAdapter = context.options.singleTenantOptions.singleTenantAdapter;
     if (!singleTenantAdapter) {

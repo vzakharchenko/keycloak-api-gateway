@@ -36,9 +36,9 @@ function transform(opts: APIGateWayOptions): Options {
         keys: opts.keys,
       },
     },
-    singleTenantOptions:{
+    singleTenantOptions: {
       defaultAdapterOptions: opts.defaultAdapterOptions,
-      idp:opts.identityProviders?.singleTenant,
+      idp: opts.identityProviders?.singleTenant,
     },
     pageHandlers: opts.pageHandlers,
   };
@@ -46,7 +46,7 @@ function transform(opts: APIGateWayOptions): Options {
     options.multiTenantOptions = {
       multiTenantJson: opts.multiTenantJson,
       multiTenantAdapterOptions: opts.multiTenantAdapterOptions,
-      idp:opts.identityProviders?.multiTenant,
+      idp: opts.identityProviders?.multiTenant,
     };
   }
   return options;
@@ -67,8 +67,8 @@ export function initOptions(opts: APIGateWayOptions | Options): Options {
     options.callback = new DefaultCallback(options);
   }
   if (!options.singleTenantOptions) {
-    options.singleTenantOptions ={
-    }
+    options.singleTenantOptions = {
+    };
   }
   if (!options.singleTenantOptions.singleTenantAdapter) {
     options.singleTenantOptions.singleTenantAdapter = new DefaultTenantAdapter(options);
