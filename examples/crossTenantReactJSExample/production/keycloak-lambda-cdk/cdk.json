@@ -1,0 +1,4 @@
+{
+  "app": "node index.js",
+  "plugin": ["cdk-assume-role-credential-plugin"]
+}

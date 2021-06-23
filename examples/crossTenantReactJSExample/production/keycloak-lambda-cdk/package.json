@@ -1,0 +1,19 @@
+{
+  "name": "keycloak-cloudfront-cdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-test": "node index.js"
+  },
+  "author": "vzakharchenko",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@aws-cdk/aws-cloudfront": "^1.109.0",
+    "@aws-cdk/aws-dynamodb": "^1.109.0",
+    "@aws-cdk/aws-lambda": "^1.109.0",
+    "@aws-cdk/aws-s3": "^1.109.0",
+    "@aws-cdk/aws-s3-deployment": "^1.109.0",
+    "@aws-cdk/core": "^1.109.0"
+  }
+}

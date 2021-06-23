@@ -1,0 +1,11 @@
+{
+  "realm": "Portal",
+  "auth-server-url": "http://localhost:8080/auth/",
+  "ssl-required": "external",
+  "resource": "Portal-service",
+  "credentials": {
+    "secret": "Portal-service"
+  },
+  "confidential-port": 0,
+  "policy-enforcer": {}
+}

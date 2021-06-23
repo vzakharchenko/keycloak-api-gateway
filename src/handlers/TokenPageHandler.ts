@@ -22,10 +22,13 @@ export async function getActiveToken(req:RequestObject,
     token = await multiTenantAdapter.tenant(req, res, next);
 
   } else {
-    if (!context.options.singleTenantAdapter) {
+    if (!context.options.singleTenantOptions){
+      throw new Error('singleTenantOptions does not defined')
+    }
+    if (!context.options.singleTenantOptions.singleTenantAdapter) {
       throw new Error('singleTenantAdapter does not defined');
     }
-    const singleTenantAdapter = context.options.singleTenantAdapter;
+    const singleTenantAdapter = context.options.singleTenantOptions.singleTenantAdapter;
     token = await singleTenantAdapter.singleTenant(req, res, next);
   }
   return token;

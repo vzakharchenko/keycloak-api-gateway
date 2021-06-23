@@ -23,12 +23,24 @@ export type MultiTenantSelectorOptions = {
     headerName?: string;
 }
 
+export type IdentityProviders = {
+    multiTenant?: string;
+    singleTenant?: string;
+}
+
 export type MultiTenantOptions = {
     multiTenantJson: (tenant: string) => Promise<any> | any;
     // eslint-disable-next-line no-warning-comments, line-comment-position
     multiTenantAdapterOptions: any; // todo
     multiTenantAdapter?: MultiTenantAdapter;
     multiTenantSelectorOptions?: MultiTenantSelectorOptions;
+    idp?:string;
+}
+export type SingleTenantOptions = {
+    // eslint-disable-next-line no-warning-comments, line-comment-position
+    defaultAdapterOptions?: any;  // todo
+    singleTenantAdapter?: TenantAdapter;
+    idp?:string;
 }
 
 export type CookieType = {
@@ -59,9 +71,7 @@ export type ResponseObject = {
 
 export type Options = {
     multiTenantOptions?: MultiTenantOptions;
-    // eslint-disable-next-line no-warning-comments, line-comment-position
-    defaultAdapterOptions?: any; // todo
-    singleTenantAdapter?: TenantAdapter;
+    singleTenantOptions?: SingleTenantOptions;
     pageHandlers?: PageHandlers;
     session: SessionOptions;
     logout?: Logout;

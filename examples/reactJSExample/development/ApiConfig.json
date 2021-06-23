@@ -1,15 +1,17 @@
 {
-  "defaultAdapterOptions": {
-    "keycloakJson": {
-      "realm": "express-example",
-      "auth-server-url": "http://localhost:8090/auth/",
-      "ssl-required": "external",
-      "resource": "express-example",
-      "credentials": {
-        "secret": "express-example"
-      },
-      "use-resource-role-mappings": true,
-      "confidential-port": 0
+  "singleTenantOptions": {
+    "defaultAdapterOptions": {
+      "keycloakJson": {
+        "realm": "express-example",
+        "auth-server-url": "http://localhost:8090/auth/",
+        "ssl-required": "external",
+        "resource": "express-example",
+        "credentials": {
+          "secret": "express-example"
+        },
+        "use-resource-role-mappings": true,
+        "confidential-port": 0
+      }
     }
   },
   "storageType": "InMemoryDB",

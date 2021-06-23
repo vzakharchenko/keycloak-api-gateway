@@ -41,3 +41,11 @@ jobs:
     - run: cd examples/multiTenantReactJSExample/production && npm run build
     - run: cd examples/multiTenantReactJSExample/tenantSelectorApp && npm i
     - run: cd examples/multiTenantReactJSExample/tenantSelectorApp && npm run lint
+    - run: cd examples/crossTenantReactJSExample/development && npm i
+    - run: cd examples/crossTenantReactJSExample/development && npm run lint
+    - run: cd examples/crossTenantReactJSExample/development && npm run build
+    - run: cd examples/crossTenantReactJSExample/production && npm i
+    - run: cd examples/crossTenantReactJSExample/production && npm run lint
+    - run: cd examples/crossTenantReactJSExample/production && npm run build
+    - run: cd examples/crossTenantReactJSExample/tenantSelectorApp && npm i
+    - run: cd examples/crossTenantReactJSExample/tenantSelectorApp && npm run lint

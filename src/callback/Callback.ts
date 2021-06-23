@@ -60,15 +60,18 @@ export class DefaultCallback implements Callback {
         }, keycloakJson);
         sessionId = await this.options.session.sessionManager.createSession(req, state, token);
       } else {
-        if (!this.options.defaultAdapterOptions) {
+        if (!this.options.singleTenantOptions){
+          throw new Error('singleTenantOptions does not defined')
+        }
+        if (!this.options.singleTenantOptions.defaultAdapterOptions) {
           throw new Error('Default Adapter Options does not defined');
         }
         token = await getTokenByCode(code, currentHost,
           {
-            ...commonOptions(this.options.defaultAdapterOptions,
-                            this.options.defaultAdapterOptions.keycloakJson),
+            ...commonOptions(this.options.singleTenantOptions.defaultAdapterOptions,
+                            this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson),
           },
-                    this.options.defaultAdapterOptions.keycloakJson);
+                    this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
         sessionId = await this.options.session.sessionManager.createSession(req, state, token);
       }
       res.cookie(getSessionName(this.options), sessionId);

@@ -1,0 +1,38 @@
+
+<table border="1">
+    <caption>List Tenants</caption>
+    <tr>
+        <th>Tenant Name</th>
+        <th>Tenant Label</th>
+        <th>State</th>
+        <th>Select</th>
+    </tr>
+      {{#each tenants}}
+                    <tr>
+                        <td>{{name}}</td>
+                        <td>{{label}}</td>
+                        {{#if requestAccess}}
+                          <td>-</td>
+                               <form action="/requestAccess?tenant={{name}}" method="post">
+                                       <td><input type="submit" value="Request Access"></td>
+                                       </form>
+                        {{else}}
+                         {{#if hasAccess}}
+                          <td>-</td>
+                               <td><button id="{{name}}" class="float-left submit-button" >Select</button>
+                                                     <script type="text/javascript">
+                                                         document.getElementById("{{name}}").onclick = function () {
+                                                             location.href = "{{redirectUri}}"+"?kc_idp_hint=portal";
+                                                         };
+                                                     </script></td>
+                           {{else}}
+                        <td>{{state}}</td>
+      <td>-</td>
+                            {{/if}}
+                        {{/if}}
+
+
+                    </tr>
+      {{/each}}
+</table>
+

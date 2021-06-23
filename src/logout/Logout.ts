@@ -17,7 +17,10 @@ export class Logout {
   }
 
   async redirectDefaultLogout(req:RequestObject, res:ResponseObject) {
-    const keycloakJson = await getKeycloakJsonFunction(this.options.defaultAdapterOptions.keycloakJson);
+    if (!this.options.singleTenantOptions){
+      throw new Error('singleTenantOptions does not defined')
+    }
+    const keycloakJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
     res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/logout?redirect_uri=${getCurrentHost(req)}/`);
   }
 
@@ -34,7 +37,10 @@ export class Logout {
     res.cookie(sessionCookieName, '', {expires: new Date(2671200000)});
     if (!sessionToken) {
             // default tenant entrypoint
-      await this.options.singleTenantAdapter?.redirectTenantLogin(request, res);
+      if (!this.options.singleTenantOptions){
+        throw new Error('singleTenantOptions does not defined')
+      }
+      await this.options.singleTenantOptions.singleTenantAdapter?.redirectTenantLogin(request, res);
     } else if (sessionToken.tenant) {
             // MultiTenant User
       await this.redirectTenantLogout(request, res, sessionToken.tenant);

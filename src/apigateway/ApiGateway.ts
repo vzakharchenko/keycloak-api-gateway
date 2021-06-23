@@ -1,5 +1,5 @@
 import {getSessionToken, SessionTokenKeys} from "../session/SessionManager";
-import {Options, RequestObject, ResponseObject} from "../index";
+import {IdentityProviders, Options, RequestObject, ResponseObject} from "../index";
 import {DynamoDbSettings} from "../session/storage/DynamoDB";
 import {getCustomPageHandler, getSessionName} from "../utils/KeycloakUtils";
 import {initOptions} from "../utils/DefaultPageHandlers";
@@ -12,6 +12,7 @@ export type APIGateWayOptions = {
     multiTenantAdapterOptions?: any; // todo
     // eslint-disable-next-line no-warning-comments, line-comment-position
     defaultAdapterOptions?: any; // todo
+    identityProviders?: IdentityProviders;
     pageHandlers?: PageHandlers;
     storageType: string,
     storageTypeSettings?: DynamoDbSettings | any
@@ -51,10 +52,10 @@ export class DefaultApiGateway implements ApiGateway {
     if (!this.options.callback) {
       throw new Error('callback is undefined');
     }
-    const singleTenantAdapter = this.options.singleTenantAdapter;
-    if (!singleTenantAdapter) {
+    if (!this.options.singleTenantOptions || !this.options.singleTenantOptions.singleTenantAdapter) {
       throw new Error('singleTenantAdapter is undefined');
     }
+    const singleTenantAdapter = this.options.singleTenantOptions.singleTenantAdapter;
     if (this.options.logout.isLogout(request)) {
       await this.options.logout.logout(request, response);
       return;
@@ -80,7 +81,7 @@ export class DefaultApiGateway implements ApiGateway {
       return;
     }
 
-    if (this.options.defaultAdapterOptions) {
+    if (this.options.singleTenantOptions && this.options.singleTenantOptions.singleTenantAdapter) {
       customPageHandler = await getCustomPageHandler('single',
           request, this.options);
       if (customPageHandler) {
@@ -110,7 +111,7 @@ export class DefaultApiGateway implements ApiGateway {
       }
     }
 
-    if (this.options.defaultAdapterOptions) {
+    if (this.options.singleTenantOptions.defaultAdapterOptions) {
       await singleTenantAdapter.singleTenant(request, response, next);
     } else {
       throw new Error("Single tenant configuration does not defined");

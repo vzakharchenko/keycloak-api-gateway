@@ -37,19 +37,21 @@ export class DefaultTenantAdapter implements TenantAdapter {
   }
 
   async tenantCheckToken(res: ResponseObject, sessionToken: SessionToken, tok: any): Promise<any> {
-
-    if (!this.options.singleTenantAdapter) {
+    if (!this.options.singleTenantOptions) {
+      throw new Error('singleTenantOptions is not defined');
+    }
+    if (!this.options.singleTenantOptions.singleTenantAdapter) {
       throw new Error('singleTenantAdapter does not defined');
     }
     if (!this.options.session.sessionManager) {
       throw new Error('sessionManager does not defined');
     }
-    const tenantRealmJson = await getKeycloakJsonFunction(this.options.defaultAdapterOptions.keycloakJson);
+    const tenantRealmJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
     const token = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
     if (token) {
       let returnToken;
       const tenantOptions = {
-        ...this.options.defaultAdapterOptions,
+        ...this.options.singleTenantOptions.defaultAdapterOptions,
         ...{keycloakJson: () => tenantRealmJson},
       };
       try {
@@ -91,13 +93,17 @@ export class DefaultTenantAdapter implements TenantAdapter {
   }
 
   async redirectTenantLogin(req: RequestObject, res: ResponseObject): Promise<void> {
-    const keycloakJson = await getKeycloakJsonFunction(this.options.defaultAdapterOptions.keycloakJson);
+    if (!this.options.singleTenantOptions) {
+      throw new Error('singleTenantOptions is not defined');
+    }
+    const keycloakJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
     const keycloakState: KeycloakState = {
       multiFlag: false,
       url: '/',
       tenant: keycloakJson.realm,
     };
-    res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/auth?client_id=${keycloakJson.resource}&redirect_uri=${getCurrentHost(req)}/callbacks/${keycloakJson.realm}/${keycloakJson.resource}/callback&state=${encodeURIComponent(JSON.stringify(keycloakState))}&response_type=code&nonce=1&scope=openid${keycloakJson.kc_idp_hint ? `&kc_idp_hint=${keycloakJson.kc_idp_hint}` : ''}`);
+    const kc_idp_hint = this.options.singleTenantOptions.idp;
+    res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/auth?client_id=${keycloakJson.resource}&redirect_uri=${getCurrentHost(req)}/callbacks/${keycloakJson.realm}/${keycloakJson.resource}/callback&state=${encodeURIComponent(JSON.stringify(keycloakState))}&response_type=code&nonce=1&scope=openid${kc_idp_hint ? `&kc_idp_hint=${kc_idp_hint}` : ''}`);
   }
 
 }

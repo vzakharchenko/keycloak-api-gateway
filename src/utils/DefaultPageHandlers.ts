@@ -36,13 +36,17 @@ function transform(opts: APIGateWayOptions): Options {
         keys: opts.keys,
       },
     },
-    defaultAdapterOptions: opts.defaultAdapterOptions,
+    singleTenantOptions:{
+      defaultAdapterOptions: opts.defaultAdapterOptions,
+      idp:opts.identityProviders?.singleTenant,
+    },
     pageHandlers: opts.pageHandlers,
   };
   if (opts.multiTenantAdapterOptions && opts.multiTenantJson) {
     options.multiTenantOptions = {
       multiTenantJson: opts.multiTenantJson,
       multiTenantAdapterOptions: opts.multiTenantAdapterOptions,
+      idp:opts.identityProviders?.multiTenant,
     };
   }
   return options;
@@ -62,8 +66,12 @@ export function initOptions(opts: APIGateWayOptions | Options): Options {
   if (!options.callback) {
     options.callback = new DefaultCallback(options);
   }
-  if (!options.singleTenantAdapter) {
-    options.singleTenantAdapter = new DefaultTenantAdapter(options);
+  if (!options.singleTenantOptions) {
+    options.singleTenantOptions ={
+    }
+  }
+  if (!options.singleTenantOptions.singleTenantAdapter) {
+    options.singleTenantOptions.singleTenantAdapter = new DefaultTenantAdapter(options);
   }
   if (options.multiTenantOptions) {
     if (!options.multiTenantOptions.multiTenantAdapter) {

@@ -66,11 +66,8 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
       throw new Error('multiTenantOptions is not defined');
     }
     const tenantRealmJson: any = this.options.multiTenantOptions.multiTenantJson(realm);
-//     const sessionToken = getSessionToken(
-//             req.cookies[this.options.session.sessionConfiguration.sessionCookieName],
-//             true,
-// );
-    const tenantHint = tenantRealmJson.kc_idp_hint ? `&kc_idp_hint=${tenantRealmJson.kc_idp_hint}` : '';
+    const  kc_idp_hint = req.query.kc_idp_hint || this.options.multiTenantOptions.idp;
+    const tenantHint = kc_idp_hint ? `&kc_idp_hint=${kc_idp_hint}` : '';
     const keycloakState: KeycloakState = {
       multiFlag: true,
       url: redirectUrl || '/',
