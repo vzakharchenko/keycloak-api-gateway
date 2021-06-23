@@ -3,7 +3,7 @@
 - [![npm version](https://badge.fury.io/js/keycloak-api-gateway.svg)](https://badge.fury.io/js/keycloak-api-gateway)
 
 # Description
-- [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://secure.wayforpay.com/button/b719a4043d286)
+- [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://secure.wayforpay.com/button/b95af1a9b9ed3)
 
 Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web resources(bundle.js, images, pdf etc...)
 
