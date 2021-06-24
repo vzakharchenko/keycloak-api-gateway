@@ -5,7 +5,7 @@ import {AccessLevel, Options, RequestObject, ResponseObject} from "../index";
 import {initOptions} from "../utils/DefaultPageHandlers";
 import {Logout} from "../logout/Logout";
 import {Callback} from "../callback/Callback";
-import {JWKS} from "../../dist/src/jwks/JWKS";
+import {JWKS} from "../jwks/JWKS";
 import {TenantAdapter} from "../tenant/TenantAdapter";
 import {MultiTenantAdapter} from "../multitenants/Multi-tenant-adapter";
 import {getCustomPageHandler} from "../utils/KeycloakUtils";
