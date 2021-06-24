@@ -4,7 +4,14 @@ import {getSessionToken} from "../session/SessionManager";
 
 const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
 
-export class Logout {
+export interface Logout {
+  isLogout(request: RequestObject):boolean;
+  redirectDefaultLogout(req:RequestObject, res:ResponseObject):Promise<void>|void
+  redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string):Promise<void>|void
+  logout(request: RequestObject, res: ResponseObject):Promise<void>|void
+}
+
+export class DefaultLogout implements Logout {
 
   private options: Options;
 

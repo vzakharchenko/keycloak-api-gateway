@@ -3,7 +3,7 @@ import {
 } from "../index";
 import {DefaultSessionManager} from "../session/SessionManager";
 import {APIGateWayOptions} from "../apigateway/ApiGateway";
-import {Logout} from "../logout/Logout";
+import {DefaultLogout} from "../logout/Logout";
 import {DefaultJWKS} from "../jwks/JWKS";
 import {DefaultCallback} from "../callback/Callback";
 import {DefaultTenantAdapter} from "../tenant/TenantAdapter";
@@ -55,7 +55,7 @@ function transform(opts: APIGateWayOptions): Options {
 export function initOptions(opts: APIGateWayOptions | Options): Options {
   const options = (<any>opts).session ? <Options>opts : transform(<APIGateWayOptions>opts);
   if (!options.logout) {
-    options.logout = new Logout(options);
+    options.logout = new DefaultLogout(options);
   }
   if (!options.jwks) {
     options.jwks = new DefaultJWKS(options);

@@ -1,6 +1,6 @@
 import {Options} from "./src";
 import {ApiGateway, APIGateWayOptions, DefaultApiGateway} from "./src/apigateway/ApiGateway";
-import {DefaultLambdaEdgeAdapter} from "./src/lambdaedge/LambdaEdgeAdapter";
+import {DefaultLambdaEdgeAdapter, LambdaEdgeAdapter} from "./src/lambdaedge/LambdaEdgeAdapter";
 import {WebPackDevServerMiddleWare} from "./src/express/DefaultWebPackDevServerMiddleWare";
 import {initOptions} from "./src/utils/DefaultPageHandlers";
 import {PageHandler} from "./src/handlers/PageHandler";
@@ -124,7 +124,7 @@ export class KeycloakApiGateWayAdapter implements IKeycloakApiGateWayAdapter {
         return new DefaultApiGateway(this.options)
     }
 
-    awsLambdaEdgeAdapter() {
+    awsLambdaEdgeAdapter():LambdaEdgeAdapter {
         return new DefaultLambdaEdgeAdapter(this.apiGatewayMiddleWare());
     }
 
