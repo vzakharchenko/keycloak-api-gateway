@@ -1,6 +1,7 @@
 examples
 .idea
 .github
+coverage
 package-lock.json
 updateDependencies.sh
 *.tgz

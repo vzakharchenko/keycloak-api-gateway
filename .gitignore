@@ -2,6 +2,7 @@ cdk_out
 node_modules
 dist
 build
+coverage
 .coverage
 .idea
 package-lock.json
