@@ -14,6 +14,8 @@ jobs:
 
     runs-on: ubuntu-latest
     environment: GITHUB
+    env:
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     strategy:
       matrix:
         node-version: [10.x, 12.x, 13.x, 14.x, 15.x]
