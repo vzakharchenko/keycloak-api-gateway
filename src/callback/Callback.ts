@@ -27,11 +27,6 @@ export class DefaultCallback implements Callback {
 
   constructor(options: Options) {
     this.options = options;
-    if (!this.options.session.sessionManager) {
-      this.options.session.sessionManager = new DefaultSessionManager(
-                this.options,
-            );
-    }
   }
 
   isCallBack(request: RequestObject) {

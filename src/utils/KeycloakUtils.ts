@@ -3,9 +3,9 @@ import {v4} from "uuid";
 import {AccessLevel,
   Options,
   RequestObject,
-  ResponseObject} from "../index";
+} from "../index";
 import {getSessionToken} from "../session/SessionManager";
-import {CustomPageHandlerContext, PageHandler} from "../handlers/PageHandler";
+import {PageHandler} from "../handlers/PageHandler";
 
 const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
