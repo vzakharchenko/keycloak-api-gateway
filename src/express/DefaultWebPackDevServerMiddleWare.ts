@@ -4,12 +4,10 @@ import {ApiGateway, APIGateWayOptions, DefaultApiGateway} from "../apigateway/Ap
 import {Options} from "../index";
 
 export class WebPackDevServerMiddleWare {
-  private options: APIGateWayOptions | Options;
   private apiGateway: ApiGateway;
 
-  constructor(opts: APIGateWayOptions | Options) {
-    this.options = opts;
-    this.apiGateway = new DefaultApiGateway(opts);
+  constructor(apiGateway: ApiGateway) {
+    this.apiGateway = apiGateway;
   }
 
   applyMiddleWare(devServerConfig: any) {

@@ -13,12 +13,10 @@ export interface ExpressMiddleWare {
 }
 
 export class DefaultExpressMiddleWare implements ExpressMiddleWare {
-  private options: APIGateWayOptions | Options;
   private apiGateway: ApiGateway;
 
-  constructor(opts: APIGateWayOptions | Options) {
-    this.options = opts;
-    this.apiGateway = new DefaultApiGateway(opts);
+  constructor(apiGateway: ApiGateway) {
+    this.apiGateway = apiGateway;
   }
 
   async middleWare(req: any, res: any, next: any) {

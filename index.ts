@@ -117,7 +117,7 @@ export class KeycloakApiGateWayAdapter implements IKeycloakApiGateWayAdapter {
 
     async expressMiddleWare(): Promise<ExpressMiddleWare> {
         const {DefaultExpressMiddleWare} = await import("./src/express/DefaultExpressMiddleWare");
-        return new DefaultExpressMiddleWare(this.options);
+        return new DefaultExpressMiddleWare(this.apiGatewayMiddleWare());
     }
 
     apiGatewayMiddleWare(): ApiGateway {
@@ -129,6 +129,6 @@ export class KeycloakApiGateWayAdapter implements IKeycloakApiGateWayAdapter {
     }
 
     webPackDevServerMiddleWare(): any {
-        return new WebPackDevServerMiddleWare(this.options);
+        return new WebPackDevServerMiddleWare(this.apiGatewayMiddleWare());
     }
 }
