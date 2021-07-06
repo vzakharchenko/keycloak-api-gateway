@@ -96,23 +96,40 @@ export class DummyCallBack implements Callback {
 
 }
 
-class DummyTenantAdapter implements TenantAdapter {
+export class DummyTenantAdapter implements TenantAdapter {
+
+  private readonly tenantCheck?: string;
+
+
+  constructor(tenantCheck?: string) {
+    this.tenantCheck = tenantCheck;
+  }
+
   redirectTenantLogin(req: RequestObject, res: ResponseObject): Promise<void> {
     return Promise.resolve(undefined);
   }
 
   async singleTenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
-    throw new Error('singleTenant');
+    if (this.tenantCheck || this.tenantCheck === '') {
+      if (this.tenantCheck) {
+        next(this.tenantCheck);
+      }
+      return this.tenantCheck;
+    } else {
+      throw new Error('singleTenant');
+    }
   }
 }
 
-class DummyMultiTenantAdapter implements MultiTenantAdapter {
+export class DummyMultiTenantAdapter implements MultiTenantAdapter {
 
-  private isRequest: boolean;
+  private readonly isRequest: boolean;
+  private readonly tenantCheck?: string;
 
 
-  constructor(isRequest: boolean) {
+  constructor(isRequest: boolean, tenantCheck?: string) {
     this.isRequest = isRequest;
+    this.tenantCheck = tenantCheck;
   }
 
   async isMultiTenant(req: RequestObject): Promise<boolean> {
@@ -124,7 +141,14 @@ class DummyMultiTenantAdapter implements MultiTenantAdapter {
   }
 
   async tenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
-    throw new Error('tenant');
+    if (this.tenantCheck || this.tenantCheck === '') {
+      if (this.tenantCheck) {
+        next(this.tenantCheck);
+      }
+      return this.tenantCheck;
+    } else {
+      throw new Error('tenant');
+    }
   }
 
 }

@@ -14,7 +14,7 @@ export class MultiTenantUrlPageHandler implements PageHandler {
   readonly url: string;
   readonly orderValue: number | undefined;
 
-  constructor(url: string, orderValue: number | undefined) {
+  constructor(url: string, orderValue?: number) {
     this.url = url;
     this.orderValue = orderValue;
   }
