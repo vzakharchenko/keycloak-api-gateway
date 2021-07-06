@@ -78,7 +78,11 @@ describe('SingleTenantUrlPageHandler tests', () => {
   test('test SingleTenantUrlPageHandler order', async () => {
     const singleTenantUrlPageHandler = new SingleTenantUrlPageHandler("/test", 5);
     expect(singleTenantUrlPageHandler.order()).toEqual(5);
+  });
 
+  test('test SingleTenantUrlPageHandler order 2', async () => {
+    const singleTenantUrlPageHandler = new SingleTenantUrlPageHandler("/test");
+    expect(singleTenantUrlPageHandler.order()).toEqual(110);
   });
 
   test('test SingleTenantUrlPageHandler url', async () => {

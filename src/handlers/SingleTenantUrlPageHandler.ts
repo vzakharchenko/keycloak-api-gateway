@@ -14,7 +14,7 @@ export class SingleTenantUrlPageHandler implements PageHandler {
   readonly url: string;
   readonly orderValue: number | undefined;
 
-  constructor(url: string, orderValue: number | undefined) {
+  constructor(url: string, orderValue?: number | undefined) {
     this.url = url;
     this.orderValue = orderValue;
   }

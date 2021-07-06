@@ -9,7 +9,7 @@ export type BehaviorContext = {
     /**
      * current session token
      */
-    sessionToken: SessionToken|null,
+    sessionToken?: SessionToken|null,
 
     /**
      * Options
