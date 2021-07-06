@@ -30,7 +30,7 @@ export class DefaultJWKS implements JWKS {
   }
 
   async jwks(req: RequestObject, res: ResponseObject): Promise<void> {
-    return res.json(adapter.jwks.jwksUrlResponse(this.options.session.sessionConfiguration.keys.publicKey.key));
+    return res.json(adapter.jwksUrl(this.options.session.sessionConfiguration.keys.publicKey.key));
   }
 
 }
