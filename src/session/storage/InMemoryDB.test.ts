@@ -5,6 +5,7 @@ import 'jest';
 import {RequestObject, ResponseObject} from "../../index";
 import {APIGateWayOptions} from "../../apigateway/ApiGateway";
 import {initOptions} from "../../utils/DefaultPageHandlers";
+
 import {InMemoryDB} from "./InMemoryDB";
 
 const request: RequestObject = {
@@ -49,20 +50,20 @@ describe('InMemoryDB tests', () => {
   });
 
   test('test InMemoryDB', async () => {
-    const  storage = new InMemoryDB();
+    const storage = new InMemoryDB();
     storage.readStorage();
     storage.updateStorage();
-    await storage.saveSession("1","1",1,"email",{});
+    await storage.saveSession("1", "1", 1, "email", {});
     storage.updateStorage();
     const session = await storage.getSessionIfExists("1");
     expect(session).toEqual({
-      "email": "email",
-      "exp": 1,
-      "externalToken": {},
-      "keycloakSession": "1",
-      "session": "1"
+      email: "email",
+      exp: 1,
+      externalToken: {},
+      keycloakSession: "1",
+      session: "1",
     });
-    await storage.updateSession("1","email",{});
+    await storage.updateSession("1", "email", {});
     await storage.deleteSession("1");
   });
 

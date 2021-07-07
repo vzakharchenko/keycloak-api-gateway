@@ -8,6 +8,7 @@ export type StrorageDBType = {
 }
 
 export interface StrorageDB {
+
     /**
      * save access and refresh token and link them to sessionId
      * @param sessionId a new sessionId
