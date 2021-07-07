@@ -2,9 +2,11 @@ import {decode} from 'jsonwebtoken';
 import {v4} from 'uuid';
 
 import {Options, RequestObject} from "../index";
-import {getSessionName, KeycloakState} from "../utils/KeycloakUtils";
+import {getCurrentStorage, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
 
 import {StrorageDB} from "./storage/Strorage";
+import {InMemoryDB} from './storage/InMemoryDB';
+import {DynamoDB} from './storage/DynamoDB';
 
 const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 
@@ -46,7 +48,7 @@ export function getSessionToken(sessionTokenString: string,
 }
 
 export type SessionConfiguration = {
-    storageType: string,
+    storageType: 'InMemoryDB'|'DynamoDB' | StrorageDB,
     sessionCookieName?: string,
     storageTypeSettings?: any,
     keys: SessionTokenKeys,
@@ -100,27 +102,8 @@ export class DefaultSessionManager implements SessionManager {
     this.options = options;
   }
 
-  async getCurrentStorage(): Promise<StrorageDB> {
-    switch (this.defaultSessionType.storageType) {
-      case 'InMemoryDB': {
-        const {InMemoryDB} = await import('./storage/InMemoryDB');
-        return new InMemoryDB();
-      }
-      case 'DynamoDB': {
-        if (!this.options.session.sessionConfiguration.storageTypeSettings) {
-          throw new Error('dynamoDbSettings setting does not defined');
-        }
-        const {DynamoDB} = await import('./storage/DynamoDB');
-        return new DynamoDB(this.options.session.sessionConfiguration.storageTypeSettings);
-      }
-      default: {
-        throw new Error(`${this.defaultSessionType.storageType} does not support`);
-      }
-    }
-  }
-
   async updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
-    await (await this.getCurrentStorage()).updateSession(sessionId, email, externalToken);
+    await (await getCurrentStorage(this.options)).updateSession(sessionId, email, externalToken);
   }
 
   createJWS(sessionId: string) {
@@ -148,7 +131,7 @@ export class DefaultSessionManager implements SessionManager {
       email: accessToken.email,
       sessionState: accessToken.session_state,
     }, {keys: this.defaultSessionType.keys});
-    await (await this.getCurrentStorage())
+    await (await getCurrentStorage(this.options))
       .saveSession(sessionId,
                 accessToken.session_state,
                 refreshToken.exp,
@@ -161,7 +144,7 @@ export class DefaultSessionManager implements SessionManager {
     const token = session;
     const sessionId = token.jti;
     const {sessionState} = token;
-    const sessionValue = await (await this.getCurrentStorage()).getSessionIfExists(sessionId);
+    const sessionValue = await (await getCurrentStorage(this.options)).getSessionIfExists(sessionId);
     if (sessionValue) {
       if (sessionValue.keycloakSession === sessionState) {
         return sessionValue.externalToken;

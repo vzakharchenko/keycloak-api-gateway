@@ -6,6 +6,9 @@ import {AccessLevel,
 } from "../index";
 import {getSessionToken} from "../session/SessionManager";
 import {PageHandler} from "../handlers/PageHandler";
+import {StrorageDB} from "../session/storage/Strorage";
+import {InMemoryDB} from "../session/storage/InMemoryDB";
+import {DynamoDB} from "../session/storage/DynamoDB";
 
 const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
@@ -134,3 +137,25 @@ export async function getKeycloakJsonFunction(keycloakJson: any): Promise<any> {
   const ret = await commonOptions({}, keycloakJson).keycloakJson();
   return ret;
 }
+
+export async function getCurrentStorage(options: Options): Promise<StrorageDB> {
+  if (typeof options.session.sessionConfiguration.storageType === 'string') {
+    switch (options.session.sessionConfiguration.storageType) {
+      case 'InMemoryDB': {
+        return new InMemoryDB();
+      }
+      case 'DynamoDB': {
+        if (!options.session.sessionConfiguration.storageTypeSettings) {
+          throw new Error('dynamoDbSettings setting does not defined');
+        }
+        return new DynamoDB(options.session.sessionConfiguration.storageTypeSettings);
+      }
+      default: {
+        throw new Error(`${options.session.sessionConfiguration.storageType} does not support`);
+      }
+    }
+  } else {
+    return <StrorageDB> options.session.sessionConfiguration.storageType;
+  }
+}
+

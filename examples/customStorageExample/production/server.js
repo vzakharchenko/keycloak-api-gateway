@@ -3,9 +3,12 @@ const fs = require('fs');
 const adapter = require('keycloak-api-gateway/dist');
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const {CustomStorageDB} = require("customstorage/dist");
 
+const options = JSON.parse(fs.readFileSync('./ApiConfig.json', 'utf-8'));
+options.storageType = new CustomStorageDB();
 const keycloakApiGateWayAdapter = new adapter.KeycloakApiGateWayAdapter(
-    JSON.parse(fs.readFileSync('./ApiConfig.json', 'utf-8')),
+    options,
 );
 
 const middlewareServer = express();
