@@ -162,7 +162,7 @@ describe('ApiGateway tests', () => {
     options = {
       session: {
         sessionConfiguration: {
-          storageType: 's', keys: {
+          storageType: 'InMemoryDB', keys: {
             publicKey: {
               key: '',
             }, privateKey: {

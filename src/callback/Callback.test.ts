@@ -37,7 +37,7 @@ describe('Callback tests', () => {
       session: {
         sessionManager: new DummySessionManager(),
         sessionConfiguration: {
-          storageType: 's',
+          storageType: 'InMemoryDB',
           keys: {
             publicKey: {
               key: '',

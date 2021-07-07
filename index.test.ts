@@ -6,7 +6,7 @@ import {PublicUrlPageHandler} from "./src/handlers/PublicUrlPageHandler";
 describe('index tests', () => {
     test('test', async () => {
         const adapter = new KeycloakApiGateWayAdapter({
-            storageType:'test',
+            storageType:'InMemoryDB',
             keys:{
                 privateKey:{
                     key:''

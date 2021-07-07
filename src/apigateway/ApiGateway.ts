@@ -4,6 +4,7 @@ import {DynamoDbSettings} from "../session/storage/DynamoDB";
 import {getCustomPageHandler, getSessionName} from "../utils/KeycloakUtils";
 import {initOptions} from "../utils/DefaultPageHandlers";
 import {PageHandlers} from "../handlers/PageHandler";
+import {StrorageDB} from "../session/storage/Strorage";
 
 
 export type APIGateWayOptions = {
@@ -14,7 +15,7 @@ export type APIGateWayOptions = {
     defaultAdapterOptions?: any; // todo
     identityProviders?: IdentityProviders;
     pageHandlers?: PageHandlers;
-    storageType: string,
+    storageType: 'InMemoryDB'|'DynamoDB' | StrorageDB,
     storageTypeSettings?: DynamoDbSettings | any
     keys: SessionTokenKeys,
 }

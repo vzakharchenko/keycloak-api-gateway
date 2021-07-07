@@ -10,12 +10,39 @@ import {initOptions} from "../utils/DefaultPageHandlers";
 import {DefaultJWKS} from "./JWKS";
 
 const defOptions: APIGateWayOptions = {
-  storageType: 'test',
+  storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
-      key: 'pk',
+      key: '-----BEGIN PRIVATE KEY-----\n' +
+          'MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD40tysViQSnd3E\n' +
+          'Ie5+6hDM/7ixHND8UoxYAKWwnA2/PdH2lq/pzjOo1t1Jt6ZbZx2l3cNUDt7FQXHL\n' +
+          'vZeEn0w75/LVe/gIeoKJIUTWrXyVOrrPn50oWiaKX5pnMCLWUwk1usRwnP7o26SH\n' +
+          'URTebSfBI7kQfh22aiv68qgGvo4lMWISVrWNCNej4oItLafRzvgBBD7GvJhqvPIW\n' +
+          'TMFyqDzGRtVk8nYi9x3Wwp72eUW9aY/j/akPTLdU5a+uAjlQYDrPa0wkg+/2KIhx\n' +
+          'GD/ffyggjvUaopzOEbnNGyBVXiOS3rQwwQnXNq+ip0xVecYVDJBlpOdQAxE77fUl\n' +
+          'Rrw5DzKtAgMBAAECggEASLuyf7nKX5q/2XYltfmLobDadwM6X5dtqMe/pylmp1FV\n' +
+          'z6PqlgiNdzwfgU3qletFclepoieanMRtlCW+Zaj+6r/5bsgHD8tn3tfXvH0H3sNF\n' +
+          'Gi3JDaOUgnxBsQoUFNw+4/LNOzHZHY4ewONFm2MC7OUZUqXa35iXdIp77UTEXkBG\n' +
+          'n4QdMraDW1DJUCx8nlUXHPntFN1AJANnx92Nsg6ZbhQrRRH4Lw8ydnUa3bN+Cy12\n' +
+          '9secVwo2RVS8slJgW21UpkVKEdUxe0VIL2++0trMokGK219AwlQV86hzEDmVUum2\n' +
+          'RIR3S0eknzvkJKspYc0tVvy/1uWnZggeJ+mNo1w4DQKBgQD/jpEpcdYJ9tHtBI3L\n' +
+          'e8s2Q4QLqdVPScS5dMDCw0aE6+CQoDSr0l37tHy5hxPJT+WalhyLCvPVtj0H97NP\n' +
+          'ZLAoF/pgARpd3qhPM90R7/h7HgqxW/y+n1Qt/bAG+sR6n8LCcriYU+/PeUp1ugSW\n' +
+          'AYipqpexeRHhbwAI6pAWBj9ZXwKBgQD5QU5q6gnzdM20WVzp3K4eevpaOt9w/OUW\n' +
+          'eI6o9wgVkvAo0p9irq8OM1SQlL3w3cX/YHktG9iF5oNRW6M2p7aKN1d5ZlUDhr1k\n' +
+          '/ogbtqg2CTWUikac4cUlZcour589DExlpvVL3zQda5/L7Cr0RrBmKRjMb1fyPXsy\n' +
+          'WJIllAgTcwKBgQDta7AlBuNJQotpXe+1+f6jHTqR82h/TxN7EKL8zpq3ZsSs2InW\n' +
+          'j4xNCjNN0dZqEtZHNeqyqqw6AiLVQiTOP8cAmLY9dwjd6LwJSS+7OGxrRU+90q4P\n' +
+          'EssMJ0HgWh0rpz0zlY01x9VltVOd6AHWsvoaVqizcr1P6OXpYrIWJBu6lQKBgQDS\n' +
+          '5isP048v67jRzHsNdafuKmgCSKYe2ByOcttipAK3HmkOYYhy2xNLlKsM2o4Ma9nI\n' +
+          'RzzAqjr+sRiTklH7QNT3BfSBx9BO94bxGVzY9ihF8Gzhjk5JF87T4di8v+SgpvNN\n' +
+          'X4NV+zoBWrsOtHlzzwwapNNSxzNGyDahVsfx+9sJeQKBgFuvm70VulN5Rd4TMcF2\n' +
+          'WixQNHEDStWBWPTa15ehDRIvxqfGZCkuY5o9tGY1vHxnpiHhqVheyRtLuHI6j5b3\n' +
+          'il3T5+cXdt1MnmkXUksqwgwcJdMqI5fmcuO9vdeYuGV4MoXysBdKMhqPybcVIonT\n' +
+          '5coMCbW92hodfPZ3F93PQpJU\n' +
+          '-----END PRIVATE KEY-----\n',
     },
     publicKey: {
       key: '-----BEGIN CERTIFICATE-----\n' +
