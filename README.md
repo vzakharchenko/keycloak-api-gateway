@@ -3,6 +3,7 @@
 - [![npm version](https://badge.fury.io/js/keycloak-api-gateway.svg)](https://badge.fury.io/js/keycloak-api-gateway)
 - [![Coverage Status](https://coveralls.io/repos/github/vzakharchenko/keycloak-api-gateway/badge.svg?branch=master)](https://coveralls.io/github/vzakharchenko/keycloak-api-gateway?branch=master)
 - [![Maintainability](https://api.codeclimate.com/v1/badges/7d57b4bb709970045ad3/maintainability)](https://codeclimate.com/github/vzakharchenko/keycloak-api-gateway/maintainability)
+  
 - [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://secure.wayforpay.com/button/b95af1a9b9ed3)
 
 Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web resources(bundle.js, images, pdf etc...)
