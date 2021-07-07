@@ -10,6 +10,7 @@ export async function getActiveToken(req:RequestObject,
                                      res:ResponseObject,
                                      next:any,
                                      context:CustomPageHandlerContext):Promise<any> {
+
   if (!context.sessionToken) {
     throw new Error('sessionToken does not defined');
   }

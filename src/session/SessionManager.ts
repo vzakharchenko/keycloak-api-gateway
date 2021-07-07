@@ -5,6 +5,8 @@ import {Options, RequestObject} from "../index";
 import {getSessionName, KeycloakState} from "../utils/KeycloakUtils";
 
 import {StrorageDB} from "./storage/Strorage";
+import {InMemoryDB} from './storage/InMemoryDB';
+import {DynamoDB} from './storage/DynamoDB';
 
 const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 
@@ -46,7 +48,7 @@ export function getSessionToken(sessionTokenString: string,
 }
 
 export type SessionConfiguration = {
-    storageType: string,
+    storageType: string|StrorageDB,
     sessionCookieName?: string,
     storageTypeSettings?: any,
     keys: SessionTokenKeys,
@@ -101,21 +103,23 @@ export class DefaultSessionManager implements SessionManager {
   }
 
   async getCurrentStorage(): Promise<StrorageDB> {
-    switch (this.defaultSessionType.storageType) {
-      case 'InMemoryDB': {
-        const {InMemoryDB} = await import('./storage/InMemoryDB');
-        return new InMemoryDB();
-      }
-      case 'DynamoDB': {
-        if (!this.options.session.sessionConfiguration.storageTypeSettings) {
-          throw new Error('dynamoDbSettings setting does not defined');
+    if (this.defaultSessionType.storageType instanceof String) {
+      switch (this.defaultSessionType.storageType) {
+        case 'InMemoryDB': {
+          return new InMemoryDB();
         }
-        const {DynamoDB} = await import('./storage/DynamoDB');
-        return new DynamoDB(this.options.session.sessionConfiguration.storageTypeSettings);
+        case 'DynamoDB': {
+          if (!this.options.session.sessionConfiguration.storageTypeSettings) {
+            throw new Error('dynamoDbSettings setting does not defined');
+          }
+          return new DynamoDB(this.options.session.sessionConfiguration.storageTypeSettings);
+        }
+        default: {
+          throw new Error(`${this.defaultSessionType.storageType} does not support`);
+        }
       }
-      default: {
-        throw new Error(`${this.defaultSessionType.storageType} does not support`);
-      }
+    } else {
+      return <StrorageDB> this.defaultSessionType.storageType;
     }
   }
 

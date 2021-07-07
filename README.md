@@ -19,6 +19,7 @@ Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web 
 - [Single Tenant ReactJS Application](./examples/reactJSExample)
 - [Multi-tenant  ReactJS Application with Tenant selector](./examples/multiTenantReactJSExample)
 - [Cross-tenant  ReactJS Application with Tenant selector and approval proccess](./examples/crossTenantReactJSExample)
+- [Custom Storage example](./examples/customStorageExample)
 
 # Installation
 
@@ -204,6 +205,7 @@ where
  - **storageType** place where store session data(user access and refresh tokens)
     - DynamoDB store in AWS DynamoDB
     - InMemoryDB store in file
+    - own implementation of StorageDB ([example](./examples/customStorageExample))
  - **identityProviders** Identity Provider Alias name.
     - multiTenant - Identity Provider for Multitenant application. need use the same alias name between tenants. can be overridden by request parameter kc_idp_hint
     - singleTenant - Identity Provider for application.

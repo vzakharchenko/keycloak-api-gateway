@@ -1,0 +1,30 @@
+{
+  "name": "customstorage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint --ext .ts index.ts",
+    "lint:fix": "eslint --fix index.ts --ext .ts",
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "keycloak-api-gateway": "../../.."
+  },
+  "devDependencies": {
+    "@shopify/eslint-plugin": "^40.3.0",
+    "@types/cookie": "^0.4.1",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/jest": "^26.0.24",
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/uuid": "^8.3.1",
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "coveralls": "^3.1.1",
+    "eslint": "^7.30.0",
+    "eslint-plugin-no-loops": "^0.3.0",
+    "typescript": "^4.3.5"
+  },
+  "author": "",
+  "license": "ISC"
+}
