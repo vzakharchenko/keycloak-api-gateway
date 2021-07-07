@@ -56,7 +56,13 @@ export type HeadersType = {
 
 export type RequestObject = {
     baseUrl: string,
+    clientIp?: string,
     originalUrl: string,
+    method?: string,
+    uri?: string,
+    url?: string,
+    querystring?: string,
+    signedCookies?:any,
     cookies: CookieType,
     query: QueryType,
     headers: HeadersType,
