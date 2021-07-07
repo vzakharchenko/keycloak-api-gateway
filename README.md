@@ -7,6 +7,7 @@
 Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web resources(bundle.js, images, pdf etc...)
 
 ## Features
+- lambda@edge or expressjs middleware
 - protect frontend static web resources(bundle.js and other files)
 - support Multi-Tenancy
 - change behaviour of static web resource (dynamically replace to another resource)
