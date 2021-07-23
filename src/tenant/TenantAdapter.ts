@@ -1,10 +1,11 @@
-import {Options, RequestObject, ResponseObject} from "../index";
-import {getSessionToken, SessionToken} from "../session/SessionManager";
-import {getCurrentHost, getKeycloakJsonFunction, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
+import KeycloakAdapter from "keycloak-lambda-authorizer";
+import {SecurityAdapter} from "keycloak-lambda-authorizer/dist/src/adapters/SecurityAdapter";
+import {RefreshContext, TokenJson, updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
+import {getKeycloakUrl} from "keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils";
 
-const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
-const {awsAdapter} = require('keycloak-lambda-authorizer/src/apigateway/apigateway');
-const {keycloakRefreshToken} = require('keycloak-lambda-authorizer/src/clientAuthorization');
+import {getCurrentHost, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
+import {getSessionToken, SessionToken} from "../session/SessionManager";
+import {Options, RequestObject, ResponseObject} from "../index";
 
 /**
  * single tenant adapter
@@ -31,38 +32,39 @@ export interface TenantAdapter {
 
 export class DefaultTenantAdapter implements TenantAdapter {
   options: Options;
+  securityAdapter:SecurityAdapter|null=null;
 
   constructor(options: Options) {
     this.options = options;
   }
 
-  async tenantCheckToken(res: ResponseObject, sessionToken: SessionToken, tok: any): Promise<any> {
+  async tenantCheckToken(req:RequestObject, res: ResponseObject, sessionToken: SessionToken, tok: any): Promise<TokenJson|null> {
     if (!this.options.singleTenantOptions) {
       throw new Error('singleTenantOptions is not defined');
     }
-    if (!this.options.singleTenantOptions.singleTenantAdapter) {
-      throw new Error('singleTenantAdapter does not defined');
-    }
+
     if (!this.options.session.sessionManager) {
       throw new Error('sessionManager does not defined');
     }
-    const tenantRealmJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
     const token = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
     if (token) {
-      let returnToken;
-      const tenantOptions = {
-        ...this.options.singleTenantOptions.defaultAdapterOptions,
-        ...{keycloakJson: () => tenantRealmJson},
-      };
+      let returnToken:TokenJson|null = null;
+      if (!this.securityAdapter) {
+        this.securityAdapter = new KeycloakAdapter(this.options.singleTenantOptions.defaultAdapterOptions)
+            .getDefaultAdapter();
+      }
       try {
-        await awsAdapter.adapter(tok.token,
-                    tenantOptions);
+        await this.securityAdapter.validate(tok.token);
         return token;
       } catch (e) {
-        returnToken = await keycloakRefreshToken(token, tenantOptions);
-        await this.options.session.sessionManager.updateSession(
-                    sessionToken.jti, sessionToken.email, returnToken,
-                );
+        const refreshContext:RefreshContext|null = await this.securityAdapter.refreshToken({request: req, token});
+        if (refreshContext) {
+          returnToken = refreshContext.token;
+          await this.options.session.sessionManager.updateSession(
+             sessionToken.jti, sessionToken.email, returnToken,
+         );
+        }
+
       }
       return returnToken;
     }
@@ -82,7 +84,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
     }
     try {
       const tok = await sessionManager.getSessionAccessToken(sessionToken);
-      const token = await this.tenantCheckToken(res, sessionToken, tok);
+      const token = await this.tenantCheckToken(req, res, sessionToken, tok);
       return token;
     } catch (e) {
             // eslint-disable-next-line no-console
@@ -96,7 +98,12 @@ export class DefaultTenantAdapter implements TenantAdapter {
     if (!this.options.singleTenantOptions) {
       throw new Error('singleTenantOptions is not defined');
     }
-    const keycloakJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
+    const adapterContent = updateOptions(this.options.singleTenantOptions.defaultAdapterOptions);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const keycloakJson = await adapterContent.keycloakJson(adapterContent, {
+      request: req,
+    });
     const keycloakState: KeycloakState = {
       multiFlag: false,
       url: '/',

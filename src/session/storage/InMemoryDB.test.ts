@@ -31,6 +31,7 @@ const response: ResponseObject = {
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
@@ -53,6 +54,7 @@ describe('InMemoryDB tests', () => {
     const storage = new InMemoryDB();
     storage.readStorage();
     storage.updateStorage();
+    // @ts-ignore
     await storage.saveSession("1", "1", 1, "email", {});
     storage.updateStorage();
     const session = await storage.getSessionIfExists("1");
@@ -63,6 +65,7 @@ describe('InMemoryDB tests', () => {
       keycloakSession: "1",
       session: "1",
     });
+    // @ts-ignore
     await storage.updateSession("1", "email", {});
     await storage.deleteSession("1");
   });

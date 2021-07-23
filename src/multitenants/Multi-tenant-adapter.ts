@@ -1,17 +1,18 @@
 import {v4} from 'uuid';
+import {getKeycloakUrl} from "keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils";
+import {SecurityAdapter} from "keycloak-lambda-authorizer/dist/src/adapters/SecurityAdapter";
+import KeycloakAdapter from "keycloak-lambda-authorizer";
+import {AdapterContent, EnforcerFunction, RequestContent, TokenJson, AdapterDependencies} from "keycloak-lambda-authorizer/dist/src/Options";
+import {decodeToken} from "keycloak-lambda-authorizer/dist/src/utils/TokenUtils";
 
-import {Options, RequestObject, ResponseObject} from "../index";
-import {getSessionToken, SessionToken} from "../session/SessionManager";
 import {
   getCurrentHost,
   getSessionName,
   KeycloakState,
 } from "../utils/KeycloakUtils";
+import {getSessionToken, SessionToken} from "../session/SessionManager";
+import {Options, RequestObject, ResponseObject} from "../index";
 
-const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
-const {adapter} = require('keycloak-lambda-authorizer/src/keycloakAuthorizer');
-const {keycloakRefreshToken} = require('keycloak-lambda-authorizer/src/clientAuthorization');
-const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
 
 /**
  * Multi-Tenant Adapter
@@ -45,12 +46,22 @@ export interface MultiTenantAdapter {
 
 export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
   readonly options: Options;
+  securityAdapter:SecurityAdapter;
 
   constructor(options: Options) {
     this.options = options;
     if (!options.multiTenantOptions) {
       throw new Error('multiTenantOptions is not defined');
     }
+    const options1 = {
+      ...options.multiTenantOptions.multiTenantAdapterOptions,
+      ...{keycloakJson: async (opt: AdapterContent, requestContent: RequestContent) => {
+          // eslint-disable-next-line  @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+          // eslint-disable-next-line  no-return-await
+        return await this.options.multiTenantOptions.multiTenantJson(requestContent.realm);
+      }}};
+    this.securityAdapter = new KeycloakAdapter(<AdapterDependencies> options1).getDefaultAdapter();
   }
 
   async isMultiTenant(req: RequestObject): Promise<boolean> {
@@ -78,7 +89,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     res.redirect(302, `${getKeycloakUrl(tenantRealmJson)}/realms/${tenantRealmJson.realm}/protocol/openid-connect/auth?client_id=${tenantRealmJson.resource}&redirect_uri=${getCurrentHost(req)}/callbacks/${tenantRealmJson.realm}/${tenantRealmJson.resource}/callback&&state=${encodeURIComponent(JSON.stringify(keycloakState))}&response_type=code&nonce=${v4()}${tenantHint}`);
   }
 
-  async tenantCheckToken(res: ResponseObject, sessionToken: SessionToken, tok: any): Promise<any> {
+  async tenantCheckToken(req: RequestObject, res: ResponseObject, sessionToken: SessionToken, tok: TokenJson): Promise<any> {
 
     if (!this.options.multiTenantOptions || !sessionToken.tenant) {
       throw new Error('multiTenantOptions or tenant does not defined');
@@ -86,24 +97,29 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     if (!this.options.session.sessionManager) {
       throw new Error('sessionManager does not defined');
     }
-    const tenantRealmJson = await this.options.multiTenantOptions.multiTenantJson(sessionToken.tenant);
     const token = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
     if (token) {
       let returnToken;
-      const tenantOptions = commonOptions(
-          this.options.multiTenantOptions.multiTenantAdapterOptions,
-        tenantRealmJson,
-      );
       try {
-
-        await adapter(tok.token, tenantOptions.keycloakJson,
-                    tenantOptions);
+        const jwtToken = decodeToken(token.access_token);
+        await this.securityAdapter.validate({
+          request: req,
+          realm: sessionToken.tenant,
+          token: jwtToken,
+          tokenString: token.access_token,
+        });
         return token;
       } catch (e) {
-        returnToken = await keycloakRefreshToken(token, tenantOptions);
-        await this.options.session.sessionManager.updateSession(
-                    sessionToken.jti, sessionToken.email, returnToken,
-                );
+        returnToken = await this.securityAdapter.refreshToken({
+          realm: sessionToken.tenant,
+          token,
+          request: req,
+        });
+        if (returnToken) {
+          await this.options.session.sessionManager.updateSession(
+              sessionToken.jti, sessionToken.email, returnToken.token,
+          );
+        }
       }
       return returnToken;
     }
@@ -118,9 +134,11 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
         if (!this.options.session.sessionManager) {
           throw new Error('sessionManager is not defined');
         }
-        const accessToken = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
-        const tok = getSessionToken(accessToken.access_token, true);
-        const token = await this.tenantCheckToken(res, sessionToken, tok);
+        const tokens = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
+        if (!tokens) {
+          throw new Error('tokens are empty');
+        }
+        const token = await this.tenantCheckToken(req, res, sessionToken, tokens);
         return token;
       } catch (e) {
                     // eslint-disable-next-line no-console

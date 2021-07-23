@@ -1,5 +1,6 @@
 import {decode} from 'jsonwebtoken';
 import {v4} from 'uuid';
+import {RSAKey, TokenJson, updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
 
 import {Options, RequestObject} from "../index";
 import {getCurrentStorage, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
@@ -7,8 +8,6 @@ import {getCurrentStorage, getSessionName, KeycloakState} from "../utils/Keycloa
 import {StrorageDB} from "./storage/Strorage";
 import {InMemoryDB} from './storage/InMemoryDB';
 import {DynamoDB} from './storage/DynamoDB';
-
-const {clientJWT} = require('keycloak-lambda-authorizer/src/clientAuthorization');
 
 
 export type SessionToken = {
@@ -23,13 +22,9 @@ export type SessionToken = {
     token?: string,
 }
 
-export type SessionPrivateKey = {
-    key: string,
-    passphrase?: string;
-}
 export type SessionTokenKeys = {
-    privateKey: SessionPrivateKey,
-    publicKey: SessionPrivateKey,
+    privateKey: RSAKey,
+    publicKey: RSAKey,
 }
 
 export function getSessionToken(sessionTokenString: string,
@@ -54,13 +49,6 @@ export type SessionConfiguration = {
     keys: SessionTokenKeys,
 }
 
-export type TokenType = {
-    // eslint-disable-next-line babel/camelcase
-    access_token: string,
-    // eslint-disable-next-line babel/camelcase
-    refresh_token: string,
-}
-
 /**
  * Session Manager
  */
@@ -70,7 +58,7 @@ export interface SessionManager {
      * exchange  session Token to  Access Token
      * @param session session token
      */
-    getSessionAccessToken(session: SessionToken): Promise<any>
+    getSessionAccessToken(session: SessionToken): Promise<TokenJson|undefined>
 
     /**
      * update access and refresh tokens inside storage
@@ -78,7 +66,7 @@ export interface SessionManager {
      * @param email user email
      * @param externalToken access and refresh tokens
      */
-    updateSession(sessionId: string, email: string, externalToken: any): Promise<void>;
+    updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void>;
 
     /**
      * Create storage record with access_token,refresh_token and return signed SessionToken
@@ -86,7 +74,7 @@ export interface SessionManager {
      * @param state - keycloak session id
      * @param token access_token and refresh_token
      */
-    createSession(req: RequestObject, state: KeycloakState, token: TokenType): Promise<any>
+    createSession(req: RequestObject, state: KeycloakState, token: TokenJson): Promise<any>
 }
 
 export class DefaultSessionManager implements SessionManager {
@@ -102,7 +90,7 @@ export class DefaultSessionManager implements SessionManager {
     this.options = options;
   }
 
-  async updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
+  async updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {
     await (await getCurrentStorage(this.options)).updateSession(sessionId, email, externalToken);
   }
 
@@ -116,7 +104,7 @@ export class DefaultSessionManager implements SessionManager {
     };
   }
 
-  async createSession(req: RequestObject, state: KeycloakState, token: TokenType): Promise<any> {
+  async createSession(req: RequestObject, state: KeycloakState, token: TokenJson): Promise<any> {
     const sessionToken = getSessionToken(req.cookies[getSessionName(this.options)], false);
     const accessToken = getSessionToken(token.access_token);
     const refreshToken = getSessionToken(token.refresh_token);
@@ -124,13 +112,17 @@ export class DefaultSessionManager implements SessionManager {
       throw new Error('accessToken or refreshToken does not exists');
     }
     const sessionId = v4();
-    const ret = await clientJWT({
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+    const adapterOptions = updateOptions({keycloakJson: {}});
+    const ret = await adapterOptions.clientAuthorization.clientJWT({
       ...(sessionToken || {}),
       ...this.createJWS(sessionId),
       ...state,
       email: accessToken.email,
       sessionState: accessToken.session_state,
-    }, {keys: this.defaultSessionType.keys});
+    }, this.defaultSessionType.keys.privateKey);
+
     await (await getCurrentStorage(this.options))
       .saveSession(sessionId,
                 accessToken.session_state,
@@ -140,7 +132,7 @@ export class DefaultSessionManager implements SessionManager {
     return ret;
   }
 
-  async getSessionAccessToken(session: SessionToken): Promise<any> {
+  async getSessionAccessToken(session: SessionToken): Promise<TokenJson|undefined> {
     const token = session;
     const sessionId = token.jti;
     const {sessionState} = token;
@@ -152,7 +144,7 @@ export class DefaultSessionManager implements SessionManager {
             // eslint-disable-next-line no-console
       console.log(`keycloak session is not the same. Expected ${sessionValue.keycloakSession} but found ${sessionState}`);
     }
-    return null;
+    return undefined;
   }
 
 }

@@ -1,10 +1,11 @@
+import {TokenJson} from "keycloak-lambda-authorizer/dist/src/Options";
 
 export type StrorageDBType = {
     session: string,
     exp:number,
     keycloakSession:string,
     email:string,
-    externalToken:any,
+    externalToken: TokenJson,
 }
 
 export interface StrorageDB {
@@ -21,7 +22,7 @@ export interface StrorageDB {
                 keycloakSession: string,
                 exp: number,
                 email: string,
-                externalToken: any):Promise<void>;
+                externalToken: TokenJson):Promise<void>;
 
     /**
      * update session with new access and refresh token
@@ -29,7 +30,7 @@ export interface StrorageDB {
      * @param email user email
      * @param externalToken new access and refresh token
      */
-    updateSession(sessionId:string, email:string, externalToken:any):Promise<void>;
+    updateSession(sessionId:string, email:string, externalToken:TokenJson):Promise<void>;
 
     /**
      * get access and refresh token by sessionId

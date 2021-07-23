@@ -1,8 +1,8 @@
-import {getCurrentHost, getKeycloakJsonFunction, getSessionName} from "../utils/KeycloakUtils";
+import {getCurrentHost, getSessionName} from "../utils/KeycloakUtils";
 import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken} from "../session/SessionManager";
 
-const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
+const {getKeycloakUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
 
 export interface Logout {
   isLogout(request: RequestObject):boolean;
@@ -27,7 +27,12 @@ export class DefaultLogout implements Logout {
     if (!this.options.singleTenantOptions) {
       throw new Error('singleTenantOptions does not defined');
     }
-    const keycloakJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const keycloakJson = await this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson(this.options.singleTenantOptions.defaultAdapterOptions, {
+      request: req,
+      token: null,
+    });
     res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/logout?redirect_uri=${getCurrentHost(req)}/`);
   }
 

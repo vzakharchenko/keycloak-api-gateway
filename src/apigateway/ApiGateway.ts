@@ -1,5 +1,7 @@
+import {AdapterContent, KeycloakJsonStructure, AdapterDependencies} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {getSessionToken, SessionTokenKeys} from "../session/SessionManager";
-import {IdentityProviders, Options, RequestObject, ResponseObject} from "../index";
+import {IdentityProviders, MultitenantAdapterDependencies, Options, RequestObject, ResponseObject} from "../index";
 import {DynamoDbSettings} from "../session/storage/DynamoDB";
 import {getCustomPageHandler, getSessionName} from "../utils/KeycloakUtils";
 import {initOptions} from "../utils/DefaultPageHandlers";
@@ -8,11 +10,9 @@ import {StrorageDB} from "../session/storage/Strorage";
 
 
 export type APIGateWayOptions = {
-    multiTenantJson?: (tenant: string) => Promise<any> | any;
-    // eslint-disable-next-line no-warning-comments, line-comment-position
-    multiTenantAdapterOptions?: any; // todo
-    // eslint-disable-next-line no-warning-comments, line-comment-position
-    defaultAdapterOptions?: any; // todo
+    multiTenantJson?: (tenant: string) => Promise<KeycloakJsonStructure> | KeycloakJsonStructure;
+    multiTenantAdapterOptions?: MultitenantAdapterDependencies;
+    defaultAdapterOptions?: AdapterDependencies;
     identityProviders?: IdentityProviders;
     pageHandlers?: PageHandlers;
     storageType: 'InMemoryDB'|'DynamoDB' | StrorageDB,
@@ -62,7 +62,7 @@ export class DefaultApiGateway implements ApiGateway {
       return;
     }
     if (this.options.jwks.isJwksRoute(request)) {
-      await this.options.jwks.jwks(request, response);
+      await this.options.jwks.getPublicKey(request, response);
       return;
     }
     if (this.options.callback.isCallBack(request)) {

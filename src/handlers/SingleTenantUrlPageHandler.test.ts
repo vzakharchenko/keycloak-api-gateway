@@ -33,6 +33,7 @@ const response: ResponseObject = {
 
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
+  // @ts-ignore
   defaultAdapterOptions: {},
   keys: {
     privateKey: {

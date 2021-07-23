@@ -1,30 +1,32 @@
 /* eslint-disable no-empty-function, no-shadow, @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
 */
 import 'jest';
+import {TokenJson} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {Options, RequestObject, ResponseObject} from "../index";
-import {SessionManager, SessionToken, TokenType} from "../session/SessionManager";
+import {SessionManager, SessionToken} from "../session/SessionManager";
 import {initOptions} from "../utils/DefaultPageHandlers";
 import * as t from "../utils/KeycloakUtils";
 import {KeycloakState} from "../utils/KeycloakUtils";
+import {DummyClientAuthorization} from "../utils/DummyImplementations.test";
 
 import {DefaultCallback} from "./Callback";
 
 // import mock = jest.mock;
-jest.mock('keycloak-lambda-authorizer/src/utils/optionsUtils');
 jest.mock('../utils/KeycloakUtils');
 
 let options: Options;
 
 class DummySessionManager implements SessionManager {
-  async createSession(req: RequestObject, state: KeycloakState, token: TokenType): Promise<any> {
+  async createSession(req: RequestObject, state: KeycloakState, token: TokenJson): Promise<any> {
     return "sessionId";
   }
 
-  getSessionAccessToken(session: SessionToken): Promise<any> {
+  async getSessionAccessToken(session: SessionToken): Promise<TokenJson|undefined> {
     return Promise.resolve(undefined);
   }
 
-  updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
+  updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {
     return Promise.resolve(undefined);
   }
 
@@ -48,14 +50,14 @@ describe('Callback tests', () => {
         },
       },
       multiTenantOptions: {
+        // @ts-ignore
         multiTenantJson: () => { return {}; },
         multiTenantAdapterOptions: {
+          clientAuthorization: new DummyClientAuthorization(),
         },
       },
     };
     options = initOptions(options);
-        // @ts-ignore
-    t.getTokenByCode.mockImplementation(async () => { return {}; });
   });
 
   test('test isCallBack false', async () => {
@@ -180,8 +182,8 @@ describe('Callback tests', () => {
         redirectedUrl = url;
       },
     };
-        // @ts-ignore
-    options.singleTenantOptions.defaultAdapterOptions = null;
+    // @ts-ignore
+    options.singleTenantOptions = {};
     const defaultCallback = new DefaultCallback(options);
     await defaultCallback.callback(request, response);
     expect(redirectedUrl).toEqual('/error?message=Default Adapter Options does not defined');
@@ -212,8 +214,14 @@ describe('Callback tests', () => {
         redirectedUrl = url;
       },
     };
-        // @ts-ignore
-    options.singleTenantOptions.defaultAdapterOptions = {};
+    // @ts-ignore
+    options.singleTenantOptions = {defaultAdapterOptions: {
+      keycloakJson: () => ({realm: 'realm',
+        "auth-server-url": 'url',
+        "ssl-required": 'false',
+        resource: 'test'}),
+      clientAuthorization: new DummyClientAuthorization(),
+    }};
     const defaultCallback = new DefaultCallback(options);
     await defaultCallback.callback(request, response);
     expect(redirectedUrl).toEqual('/');

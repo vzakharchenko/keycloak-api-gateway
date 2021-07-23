@@ -1,10 +1,25 @@
-import {SessionConfiguration, SessionManager, SessionToken} from "./session/SessionManager";
-import {MultiTenantAdapter} from "./multitenants/Multi-tenant-adapter";
-import {TenantAdapter} from "./tenant/TenantAdapter";
-import {Logout} from "./logout/Logout";
-import {JWKS} from "./jwks/JWKS";
-import {Callback} from "./callback/Callback";
+import {AdapterDependencies,
+    ClientJwtKeys,
+    KeycloakJsonStructure,
+    LoggerType,
+} from "keycloak-lambda-authorizer/dist/src/Options";
+import {AdapterCache} from "keycloak-lambda-authorizer/dist/src/cache/AdapterCache";
+import {RestCalls} from "keycloak-lambda-authorizer/dist/src/utils/restCalls";
+import {EnforcerAction} from "keycloak-lambda-authorizer/dist/src/enforcer/Enforcer";
+import {UmaConfiguration} from "keycloak-lambda-authorizer/dist/src/uma/UmaConfiguration";
+import {ClientAuthorization} from "keycloak-lambda-authorizer/dist/src/clients/ClientAuthorization";
+import {ServiceAccount} from "keycloak-lambda-authorizer/dist/src/serviceaccount/ServiceAccount";
+import {SecurityAdapter} from "keycloak-lambda-authorizer/dist/src/adapters/SecurityAdapter";
+import {ResourceChecker} from "keycloak-lambda-authorizer/dist/src/enforcer/resource/Resource";
+
+
 import {PageHandlers} from "./handlers/PageHandler";
+import {Callback} from "./callback/Callback";
+import {Logout} from "./logout/Logout";
+import {TenantAdapter} from "./tenant/TenantAdapter";
+import {MultiTenantAdapter} from "./multitenants/Multi-tenant-adapter";
+import {SessionConfiguration, SessionManager, SessionToken} from "./session/SessionManager";
+import {UrlJWKS} from "./jwks/UrlJWKS";
 
 export type AccessLevel = 'public' | 'single' | 'multi-tenant';
 export type ExecuteType = (tenant: string) => Promise<any> | any;
@@ -28,17 +43,28 @@ export type IdentityProviders = {
     singleTenant?: string;
 }
 
+export type MultitenantAdapterDependencies = {
+    keys?: ClientJwtKeys,
+    cache?: AdapterCache,
+    logger?: LoggerType,
+    restClient?: RestCalls,
+    enforcer?: EnforcerAction,
+    umaConfiguration?: UmaConfiguration,
+    clientAuthorization?: ClientAuthorization,
+    serviceAccount?: ServiceAccount,
+    securityAdapter?: SecurityAdapter,
+    resourceChecker?: ResourceChecker,
+}
+
 export type MultiTenantOptions = {
-    multiTenantJson: (tenant: string) => Promise<any> | any;
-    // eslint-disable-next-line no-warning-comments, line-comment-position
-    multiTenantAdapterOptions: any; // todo
+    multiTenantJson: (tenant: string) => Promise<KeycloakJsonStructure> | KeycloakJsonStructure;
+    multiTenantAdapterOptions: MultitenantAdapterDependencies;
     multiTenantAdapter?: MultiTenantAdapter;
     multiTenantSelectorOptions?: MultiTenantSelectorOptions;
     idp?:string;
 }
 export type SingleTenantOptions = {
-    // eslint-disable-next-line no-warning-comments, line-comment-position
-    defaultAdapterOptions?: any; // todo
+    defaultAdapterOptions: AdapterDependencies;
     singleTenantAdapter?: TenantAdapter;
     idp?:string;
 }
@@ -81,7 +107,7 @@ export type Options = {
     pageHandlers?: PageHandlers;
     session: SessionOptions;
     logout?: Logout;
-    jwks?: JWKS;
+    jwks?: UrlJWKS;
     callback?: Callback;
 }
 

@@ -7,11 +7,12 @@ import {RequestObject, ResponseObject} from "../index";
 import {APIGateWayOptions} from "../apigateway/ApiGateway";
 import {initOptions} from "../utils/DefaultPageHandlers";
 
-import {DefaultJWKS} from "./JWKS";
+import {DefaultUrlJWKS} from "./UrlJWKS";
 
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
@@ -106,33 +107,42 @@ describe('JWKS tests', () => {
   });
 
   test('test JWKS success 1', async () => {
-    const jwks = new DefaultJWKS(handlerOptions);
+    const jwks = new DefaultUrlJWKS(handlerOptions);
     expect(jwks.isJwksRoute({...request, ...{
       baseUrl: '/keycloak/jwks',
     }})).toEqual(true);
   });
 
   test('test JWKS success 2', async () => {
-    const jwks = new DefaultJWKS(handlerOptions);
+    const jwks = new DefaultUrlJWKS(handlerOptions);
     expect(jwks.isJwksRoute({...request, ...{
       originalUrl: '/keycloak/jwks',
     }})).toEqual(true);
   });
   test('test JWKS failure', async () => {
-    const jwks = new DefaultJWKS(handlerOptions);
+    const jwks = new DefaultUrlJWKS(handlerOptions);
     expect(jwks.isJwksRoute({...request, ...{
       originalUrl: '/keycloak/jwk1s',
     }})).toEqual(false);
   });
 
   test('test JWKS failure 2', async () => {
-    const jwks = new DefaultJWKS(handlerOptions);
+    const jwks = new DefaultUrlJWKS(handlerOptions);
     let json = false;
-    expect(await jwks.jwks({...request, ...{
-      originalUrl: '/keycloak/jwk1s',
+    expect(await jwks.getPublicKey({...request, ...{
+      originalUrl: '/keycloak/jwks',
     }}, {...response, ...{
       json: (object: any) => {
-        expect(object).toEqual(JSON.stringify({keys: [{kty: "RSA", use: "sig", n: "APjS3KxWJBKd3cQh7n7qEMz_uLEc0PxSjFgApbCcDb890faWr-nOM6jW3Um3pltnHaXdw1QO3sVBccu9l4SfTDvn8tV7-Ah6gokhRNatfJU6us-fnShaJopfmmcwItZTCTW6xHCc_ujbpIdRFN5tJ8EjuRB-HbZqK_ryqAa-jiUxYhJWtY0I16Pigi0tp9HO-AEEPsa8mGq88hZMwXKoPMZG1WTydiL3HdbCnvZ5Rb1pj-P9qQ9Mt1Tlr64COVBgOs9rTCSD7_YoiHEYP99_KCCO9RqinM4Ruc0bIFVeI5LetDDBCdc2r6KnTFV5xhUMkGWk51ADETvt9SVGvDkPMq0", e: "AQAB"}]}));
+        expect(object).toEqual({
+          keys: [
+            {
+              e: "AQAB",
+              kty: "RSA",
+              n: "APjS3KxWJBKd3cQh7n7qEMz_uLEc0PxSjFgApbCcDb890faWr-nOM6jW3Um3pltnHaXdw1QO3sVBccu9l4SfTDvn8tV7-Ah6gokhRNatfJU6us-fnShaJopfmmcwItZTCTW6xHCc_ujbpIdRFN5tJ8EjuRB-HbZqK_ryqAa-jiUxYhJWtY0I16Pigi0tp9HO-AEEPsa8mGq88hZMwXKoPMZG1WTydiL3HdbCnvZ5Rb1pj-P9qQ9Mt1Tlr64COVBgOs9rTCSD7_YoiHEYP99_KCCO9RqinM4Ruc0bIFVeI5LetDDBCdc2r6KnTFV5xhUMkGWk51ADETvt9SVGvDkPMq0",
+              use: "sig",
+            },
+          ],
+        });
         json = true;
       },
     }})).toEqual(undefined);
