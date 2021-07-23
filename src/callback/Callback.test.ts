@@ -18,6 +18,11 @@ jest.mock('../utils/KeycloakUtils');
 let options: Options;
 
 class DummySessionManager implements SessionManager {
+  // @ts-ignore
+  deleteSession(sessionId: string): Promise<void> {
+
+  }
+
   async createSession(req: RequestObject, state: KeycloakState, token: TokenJson): Promise<any> {
     return "sessionId";
   }

@@ -2,7 +2,14 @@ import {v4} from 'uuid';
 import {getKeycloakUrl} from "keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils";
 import {SecurityAdapter} from "keycloak-lambda-authorizer/dist/src/adapters/SecurityAdapter";
 import KeycloakAdapter from "keycloak-lambda-authorizer";
-import {AdapterContent, EnforcerFunction, RequestContent, TokenJson, AdapterDependencies} from "keycloak-lambda-authorizer/dist/src/Options";
+import {
+  AdapterContent,
+  EnforcerFunction,
+  RequestContent,
+  TokenJson,
+  AdapterDependencies,
+  updateOptions,
+} from "keycloak-lambda-authorizer/dist/src/Options";
 import {decodeToken} from "keycloak-lambda-authorizer/dist/src/utils/TokenUtils";
 
 import {
@@ -90,7 +97,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     res.redirect(302, `${getKeycloakUrl(tenantRealmJson)}/realms/${tenantRealmJson.realm}/protocol/openid-connect/auth?client_id=${tenantRealmJson.resource}&redirect_uri=${getCurrentHost(req)}/callbacks/${tenantRealmJson.realm}/${tenantRealmJson.resource}/callback&&state=${encodeURIComponent(JSON.stringify(keycloakState))}&response_type=code&nonce=${v4()}${tenantHint}`);
   }
 
-  async tenantCheckToken(req: RequestObject, res: ResponseObject, sessionToken: SessionToken, enforcer?: EnforcerFunction): Promise<any> {
+  async tenantCheckToken(req: RequestObject, res: ResponseObject, sessionToken: SessionToken, enforcerFunc?: EnforcerFunction): Promise<any> {
 
     if (!this.options.multiTenantOptions || !sessionToken.tenant) {
       throw new Error('multiTenantOptions or tenant does not defined');
@@ -108,14 +115,14 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
           realm: sessionToken.tenant,
           token: jwtToken,
           tokenString: token.access_token,
-        }, enforcer);
+        }, enforcerFunc);
         return token;
       } catch (e) {
         returnToken = await this.securityAdapter.refreshToken({
           realm: sessionToken.tenant,
           token,
           request: req,
-        });
+        }, enforcerFunc);
         if (returnToken) {
           await this.options.session.sessionManager.updateSession(
               sessionToken.jti, sessionToken.email, returnToken.token,
@@ -127,24 +134,28 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     throw new Error('token does not exists in storage');
   }
 
-  async tenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any> {
+  async tenant(req: RequestObject, res: ResponseObject, next: any, enforcerFunc?: EnforcerFunction): Promise<any> {
 
     const sessionToken = getSessionToken(req.cookies[getSessionName(this.options)], true);
+    const sessionManager = this.options.session.sessionManager;
+    if (!sessionManager) {
+      throw new Error('sessionManager is not defined');
+    }
     if (sessionToken) {
       try {
-        if (!this.options.session.sessionManager) {
-          throw new Error('sessionManager is not defined');
-        }
-        const tokens = await this.options.session.sessionManager.getSessionAccessToken(sessionToken);
+        const tokens = await sessionManager.getSessionAccessToken(sessionToken);
         if (!tokens) {
           throw new Error('tokens are empty');
         }
-        const token = await this.tenantCheckToken(req, res, sessionToken, enforcer);
+        const token = await this.tenantCheckToken(req, res, sessionToken, enforcerFunc);
         return token;
       } catch (e) {
+        await sessionManager.deleteSession(sessionToken.jti);
                     // eslint-disable-next-line no-console
         console.log(`Error: ${e}`);
-        await this.redirectTenantLogin(req, res, <string>sessionToken.tenant, '/');
+        res.cookie(getSessionName(this.options), "");
+        await this.options.logout?.redirectTenantLogout(req, res, <string>sessionToken.tenant);
+        return null;
       }
     } else {
                 // eslint-disable-next-line no-console

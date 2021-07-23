@@ -18,7 +18,7 @@ import {Callback} from "./callback/Callback";
 import {Logout} from "./logout/Logout";
 import {TenantAdapter} from "./tenant/TenantAdapter";
 import {MultiTenantAdapter} from "./multitenants/Multi-tenant-adapter";
-import {SessionConfiguration, SessionManager, SessionToken} from "./session/SessionManager";
+import {SessionConfiguration, SessionManager} from "./session/SessionManager";
 import {UrlJWKS} from "./jwks/UrlJWKS";
 
 export type AccessLevel = 'public' | 'single' | 'multi-tenant';

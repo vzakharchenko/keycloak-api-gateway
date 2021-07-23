@@ -1,6 +1,6 @@
 {
   "name": "keycloak-api-gateway",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -50,7 +50,7 @@
     "aws-sdk": "^2.952.0",
     "jsonwebtoken": "^8.5.1",
     "jws": "^4.0.0",
-    "keycloak-lambda-authorizer": "1.0.1",
+    "keycloak-lambda-authorizer": "1.0.4",
     "uuid": "^8.3.2"
   },
   "optionalDependencies": {

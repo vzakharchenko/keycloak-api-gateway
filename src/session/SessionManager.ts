@@ -75,6 +75,12 @@ export interface SessionManager {
      * @param token access_token and refresh_token
      */
     createSession(req: RequestObject, state: KeycloakState, token: TokenJson): Promise<any>
+
+    /**
+     * delete session
+     * @param sessionId  storageID
+     */
+    deleteSession(sessionId: string): Promise<void>
 }
 
 export class DefaultSessionManager implements SessionManager {
@@ -88,6 +94,10 @@ export class DefaultSessionManager implements SessionManager {
     getSessionName(options);
     this.defaultSessionType = options.session.sessionConfiguration;
     this.options = options;
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await (await getCurrentStorage(this.options)).deleteSession(sessionId);
   }
 
   async updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {

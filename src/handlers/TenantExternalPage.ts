@@ -1,3 +1,5 @@
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {AccessLevel, RequestObject, ResponseObject} from "../index";
 import {getCurrentHost} from "../utils/KeycloakUtils";
 
@@ -85,13 +87,16 @@ export class TenantExternalPage implements PageHandler {
   readonly url: string;
   readonly tenantExternalPage: TenantExternalPageContext;
   readonly orderValue: number | undefined;
+  readonly enforcer?: EnforcerFunction;
 
   constructor(url: string,
                 context: TenantExternalPageContext,
-                orderValue?: number) {
+                orderValue?: number,
+                enforcer?: EnforcerFunction) {
     this.url = url;
     this.orderValue = orderValue;
     this.tenantExternalPage = context;
+    this.enforcer = enforcer;
   }
 
   getUrl() {
@@ -117,7 +122,7 @@ export class TenantExternalPage implements PageHandler {
         context: CustomPageHandlerContext,
     ):Promise<void> {
     if (!this.tenantExternalPage.alwaysRedirect && context.sessionToken) {
-      const token = await getActiveToken(req, res, next, context);
+      const token = await getActiveToken(req, res, next, context, this.enforcer);
       if (token) {
         next();
 

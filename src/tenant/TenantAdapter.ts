@@ -39,7 +39,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
     this.options = options;
   }
 
-  async tenantCheckToken(req:RequestObject, res: ResponseObject, sessionToken: SessionToken, tok: any): Promise<TokenJson|null> {
+  async tenantCheckToken(req:RequestObject, res: ResponseObject, sessionToken: SessionToken, tok: any, enforcer?: EnforcerFunction): Promise<TokenJson|null> {
     if (!this.options.singleTenantOptions) {
       throw new Error('singleTenantOptions is not defined');
     }
@@ -55,7 +55,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
             .getDefaultAdapter();
       }
       try {
-        await this.securityAdapter.validate(tok.token);
+        await this.securityAdapter.validate(tok.token, enforcer);
         return token;
       } catch (e) {
         const refreshContext:RefreshContext|null = await this.securityAdapter.refreshToken({request: req, token});
@@ -73,7 +73,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
   }
 
 
-  async singleTenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
+  async singleTenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any> {
     if (!this.options.session.sessionManager) {
       throw new Error('sessionManager does not provided');
     }
@@ -85,11 +85,14 @@ export class DefaultTenantAdapter implements TenantAdapter {
     }
     try {
       const tok = await sessionManager.getSessionAccessToken(sessionToken);
-      const token = await this.tenantCheckToken(req, res, sessionToken, tok);
+      const token = await this.tenantCheckToken(req, res, sessionToken, tok, enforcer);
       return token;
     } catch (e) {
+      await sessionManager.deleteSession(sessionToken.jti);
             // eslint-disable-next-line no-console
       console.log(`Error: ${e}`);
+      res.cookie(getSessionName(this.options), "");
+      await this.options.logout?.logout(req, res);
       await this.redirectTenantLogin(req, res);
     }
     return null;

@@ -35,10 +35,14 @@ const keycloakApiGateWayAdapter = new adapter.KeycloakApiGateWayAdapter(
     .addCustomPageHandler(new TenantExternalPage("/", {
         redirectedUrl: "http://localhost:8082",
         applicationName: 'multiTenantreactJsExample'
-    }, 0))
+    }, 0, {
+        realmRole: 'Multi-tenant-Role'
+    }))
     .addCustomPageHandler(new TenantExternalPage("/index.html", {
         redirectedUrl: "http://localhost:8082",
         applicationName: 'multiTenantreactJsExample'
-    }, 32000))
+    }, 32000, {
+        realmRole: 'Multi-tenant-Role'
+    }))
 
 module.exports = keycloakApiGateWayAdapter

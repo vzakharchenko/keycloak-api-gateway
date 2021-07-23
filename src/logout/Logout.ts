@@ -7,7 +7,7 @@ const {getKeycloakUrl} = require('keycloak-lambda-authorizer/dist/src/utils/Keyc
 export interface Logout {
   isLogout(request: RequestObject):boolean;
   redirectDefaultLogout(req:RequestObject, res:ResponseObject):Promise<void>|void
-  redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string):Promise<void>|void
+  redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string, redirectUrl?: string):Promise<void>|void
   logout(request: RequestObject, res: ResponseObject):Promise<void>|void
 }
 
@@ -36,9 +36,13 @@ export class DefaultLogout implements Logout {
     res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/logout?redirect_uri=${getCurrentHost(req)}/`);
   }
 
-  async redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string) {
+  async redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string, redirectUrl?: string) {
     const keycloakJson = await this.options.multiTenantOptions?.multiTenantJson(tenantName);
-    res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${tenantName}/protocol/openid-connect/logout?redirect_uri=${getCurrentHost(req)}/tenants/${tenantName}`);
+    // eslint-disable-next-line babel/camelcase
+    const kc_idp_hint = req.query.kc_idp_hint || this.options.multiTenantOptions?.idp;
+    // eslint-disable-next-line babel/camelcase
+    const tenantHint = kc_idp_hint ? `&kc_idp_hint=${kc_idp_hint}` : '';
+    res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${tenantName}/protocol/openid-connect/logout?redirect_uri=${redirectUrl || `${getCurrentHost(req)}/tenants/${tenantName}`}${tenantHint}`);
   }
 
   async logout(request: RequestObject, res: ResponseObject): Promise<void> {
