@@ -1,6 +1,6 @@
 import KeycloakAdapter from "keycloak-lambda-authorizer";
 import {SecurityAdapter} from "keycloak-lambda-authorizer/dist/src/adapters/SecurityAdapter";
-import {RefreshContext, TokenJson, updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
+import {EnforcerFunction, RefreshContext, TokenJson, updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
 import {getKeycloakUrl} from "keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils";
 
 import {getCurrentHost, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
@@ -17,8 +17,9 @@ export interface TenantAdapter {
      * @param req http request
      * @param res http response
      * @param next allow request
+     * @param enforcer Authorization
      */
-    singleTenant(req: RequestObject, res: ResponseObject, next: any): Promise<any>
+    singleTenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any>
 
     /**
      * If needed authentication redirect to Tenant login page

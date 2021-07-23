@@ -1,3 +1,5 @@
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {
     AccessLevel,
     RequestObject,
@@ -13,10 +15,12 @@ export class SingleTenantUrlPageHandler implements PageHandler {
 
   readonly url: string;
   readonly orderValue: number | undefined;
+  readonly enforcer?: EnforcerFunction;
 
-  constructor(url: string, orderValue?: number | undefined) {
+  constructor(url: string, orderValue?: number | undefined, enforcer?: EnforcerFunction) {
     this.url = url;
     this.orderValue = orderValue;
+    this.enforcer = enforcer;
   }
 
   getAccessLevel(): AccessLevel {
@@ -44,7 +48,7 @@ export class SingleTenantUrlPageHandler implements PageHandler {
     if (!singleTenantAdapter) {
       throw new Error('singleTenantAdapter does not defined');
     }
-    const token = await singleTenantAdapter.singleTenant(req, res, next);
+    const token = await singleTenantAdapter.singleTenant(req, res, next, this.enforcer);
     if (token) {
       next();
     }

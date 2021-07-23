@@ -1,6 +1,8 @@
 /* eslint-disable no-empty-function, no-shadow, @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
 */
 import 'jest';
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {AccessLevel, Options, RequestObject, ResponseObject} from "../index";
 import {initOptions} from "../utils/DefaultPageHandlers";
 import {Logout} from "../logout/Logout";
@@ -109,7 +111,7 @@ export class DummyTenantAdapter implements TenantAdapter {
     return Promise.resolve(undefined);
   }
 
-  async singleTenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
+  async singleTenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any> {
     if (this.tenantCheck || this.tenantCheck === '') {
       if (this.tenantCheck) {
         next(this.tenantCheck);

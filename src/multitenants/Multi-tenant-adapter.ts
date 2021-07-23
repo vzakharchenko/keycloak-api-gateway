@@ -40,8 +40,9 @@ export interface MultiTenantAdapter {
    * @param req http request
    * @param res http response
    * @param next allow request
+   * @param enforcer Authorization
    */
-    tenant(req: RequestObject, res: ResponseObject, next: any): Promise<any>
+    tenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any>
 }
 
 export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
@@ -89,7 +90,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     res.redirect(302, `${getKeycloakUrl(tenantRealmJson)}/realms/${tenantRealmJson.realm}/protocol/openid-connect/auth?client_id=${tenantRealmJson.resource}&redirect_uri=${getCurrentHost(req)}/callbacks/${tenantRealmJson.realm}/${tenantRealmJson.resource}/callback&&state=${encodeURIComponent(JSON.stringify(keycloakState))}&response_type=code&nonce=${v4()}${tenantHint}`);
   }
 
-  async tenantCheckToken(req: RequestObject, res: ResponseObject, sessionToken: SessionToken, tok: TokenJson): Promise<any> {
+  async tenantCheckToken(req: RequestObject, res: ResponseObject, sessionToken: SessionToken, enforcer?: EnforcerFunction): Promise<any> {
 
     if (!this.options.multiTenantOptions || !sessionToken.tenant) {
       throw new Error('multiTenantOptions or tenant does not defined');
@@ -107,7 +108,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
           realm: sessionToken.tenant,
           token: jwtToken,
           tokenString: token.access_token,
-        });
+        }, enforcer);
         return token;
       } catch (e) {
         returnToken = await this.securityAdapter.refreshToken({
@@ -126,7 +127,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
     throw new Error('token does not exists in storage');
   }
 
-  async tenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
+  async tenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any> {
 
     const sessionToken = getSessionToken(req.cookies[getSessionName(this.options)], true);
     if (sessionToken) {
@@ -138,7 +139,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
         if (!tokens) {
           throw new Error('tokens are empty');
         }
-        const token = await this.tenantCheckToken(req, res, sessionToken, tokens);
+        const token = await this.tenantCheckToken(req, res, sessionToken, enforcer);
         return token;
       } catch (e) {
                     // eslint-disable-next-line no-console
