@@ -3,13 +3,14 @@
 - [![npm version](https://badge.fury.io/js/keycloak-api-gateway.svg)](https://badge.fury.io/js/keycloak-api-gateway)
 - [![Coverage Status](https://coveralls.io/repos/github/vzakharchenko/keycloak-api-gateway/badge.svg?branch=master)](https://coveralls.io/github/vzakharchenko/keycloak-api-gateway?branch=master)
 - [![Maintainability](https://api.codeclimate.com/v1/badges/7d57b4bb709970045ad3/maintainability)](https://codeclimate.com/github/vzakharchenko/keycloak-api-gateway/maintainability)
-  
+
 - [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://secure.wayforpay.com/button/b95af1a9b9ed3)
 
 Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web resources(bundle.js, images, pdf etc...)
 
 ## Features
 - lambda@edge or expressjs middleware
+- authorization based on realm/client role and security resources
 - protect frontend static web resources(bundle.js and other files)
 - support Multi-Tenancy
 - change behaviour of static web resource (dynamically replace to another resource)
@@ -21,7 +22,7 @@ Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web 
 # Examples
 - [Single Tenant ReactJS Application](./examples/reactJSExample)
 - [Multi-tenant  ReactJS Application with Tenant selector](./examples/multiTenantReactJSExample)
-- [Cross-tenant  ReactJS Application with Tenant selector and approval proccess](./examples/crossTenantReactJSExample)
+- [Cross-tenant  ReactJS Application with Tenant selector and approval proccess (Authorization based on security resources)](./examples/crossTenantReactJSExample)
 - [Custom Storage example](./examples/customStorageExample)
 
 # Installation

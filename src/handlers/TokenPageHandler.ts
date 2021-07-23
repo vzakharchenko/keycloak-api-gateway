@@ -12,7 +12,7 @@ export async function getActiveToken(req:RequestObject,
                                      res:ResponseObject,
                                      next:any,
                                      context:CustomPageHandlerContext,
-enforcer?: EnforcerFunction):Promise<any> {
+                                     authorization?: EnforcerFunction):Promise<any> {
 
   if (!context.sessionToken) {
     throw new Error('sessionToken does not defined');
@@ -23,7 +23,7 @@ enforcer?: EnforcerFunction):Promise<any> {
       throw new Error('multiTenantOptions does not defined');
     }
     const multiTenantAdapter = context.options.multiTenantOptions.multiTenantAdapter;
-    token = await multiTenantAdapter.tenant(req, res, next, enforcer);
+    token = await multiTenantAdapter.tenant(req, res, next, authorization);
 
   } else {
     if (!context.options.singleTenantOptions) {
@@ -33,7 +33,7 @@ enforcer?: EnforcerFunction):Promise<any> {
       throw new Error('singleTenantAdapter does not defined');
     }
     const singleTenantAdapter = context.options.singleTenantOptions.singleTenantAdapter;
-    token = await singleTenantAdapter.singleTenant(req, res, next, enforcer);
+    token = await singleTenantAdapter.singleTenant(req, res, next, authorization);
   }
   return token;
 }

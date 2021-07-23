@@ -1,5 +1,6 @@
-import {AdapterDependencies,
-    ClientJwtKeys,
+import {
+    AdapterDependencies,
+    ClientJwtKeys, EnforcerFunction,
     KeycloakJsonStructure,
     LoggerType,
 } from "keycloak-lambda-authorizer/dist/src/Options";
@@ -49,6 +50,7 @@ export type MultitenantAdapterDependencies = {
     logger?: LoggerType,
     restClient?: RestCalls,
     enforcer?: EnforcerAction,
+    defaultAuthorization?: EnforcerFunction;
     umaConfiguration?: UmaConfiguration,
     clientAuthorization?: ClientAuthorization,
     serviceAccount?: ServiceAccount,
@@ -108,6 +110,7 @@ export type Options = {
     session: SessionOptions;
     logout?: Logout;
     jwks?: UrlJWKS;
+    defaultAuthorization?: EnforcerFunction;
     callback?: Callback;
 }
 

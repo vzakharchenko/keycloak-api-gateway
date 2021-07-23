@@ -1,4 +1,9 @@
-import {AdapterContent, KeycloakJsonStructure, AdapterDependencies} from "keycloak-lambda-authorizer/dist/src/Options";
+import {
+  AdapterContent,
+  KeycloakJsonStructure,
+  AdapterDependencies,
+  EnforcerFunction,
+} from "keycloak-lambda-authorizer/dist/src/Options";
 
 import {getSessionToken, SessionTokenKeys} from "../session/SessionManager";
 import {IdentityProviders, MultitenantAdapterDependencies, Options, RequestObject, ResponseObject} from "../index";
@@ -17,6 +22,7 @@ export type APIGateWayOptions = {
     pageHandlers?: PageHandlers;
     storageType: 'InMemoryDB'|'DynamoDB' | StrorageDB,
     storageTypeSettings?: DynamoDbSettings | any
+    defaultAuthorization?: EnforcerFunction;
     keys: SessionTokenKeys,
 }
 

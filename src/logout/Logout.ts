@@ -1,3 +1,5 @@
+import {updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {getCurrentHost, getSessionName} from "../utils/KeycloakUtils";
 import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken} from "../session/SessionManager";
@@ -29,7 +31,7 @@ export class DefaultLogout implements Logout {
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const keycloakJson = await this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson(this.options.singleTenantOptions.defaultAdapterOptions, {
+    const keycloakJson = await updateOptions({...this.options.singleTenantOptions.defaultAdapterOptions}).keycloakJson(this.options.singleTenantOptions.defaultAdapterOptions, {
       request: req,
       token: null,
     });
@@ -57,7 +59,7 @@ export class DefaultLogout implements Logout {
         throw new Error('singleTenantOptions does not defined');
       }
       await this.options.singleTenantOptions.singleTenantAdapter?.redirectTenantLogin(request, res);
-    } else if (sessionToken.tenant) {
+    } else if (sessionToken.multiFlag && sessionToken.tenant) {
             // MultiTenant User
       await this.redirectTenantLogout(request, res, sessionToken.tenant);
     } else {

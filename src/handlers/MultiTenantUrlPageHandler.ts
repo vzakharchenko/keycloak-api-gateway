@@ -15,12 +15,12 @@ export class MultiTenantUrlPageHandler implements PageHandler {
 
   readonly url: string;
   readonly orderValue: number | undefined;
-  readonly enforcer?: EnforcerFunction;
+  readonly authorization?: EnforcerFunction;
 
-  constructor(url: string, orderValue?: number, enforcer?: EnforcerFunction) {
+  constructor(url: string, orderValue?: number, authorization?: EnforcerFunction) {
     this.url = url;
     this.orderValue = orderValue;
-    this.enforcer = enforcer;
+    this.authorization = authorization;
   }
 
   getAccessLevel(): AccessLevel {
@@ -47,7 +47,7 @@ export class MultiTenantUrlPageHandler implements PageHandler {
     }
     const multiTenantAdapter = context.options.multiTenantOptions.multiTenantAdapter;
     if (await multiTenantAdapter.isMultiTenant(req)) {
-      const token = await multiTenantAdapter.tenant(req, res, next, this.enforcer);
+      const token = await multiTenantAdapter.tenant(req, res, next, this.authorization);
       if (token) {
         next();
       }

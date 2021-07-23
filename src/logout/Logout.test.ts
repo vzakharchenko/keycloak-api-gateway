@@ -195,10 +195,10 @@ describe('Logout tests', () => {
   test('test Logout multi-tenant logout', async () => {
         // @ts-ignore
     getSessionToken.mockImplementation(() => {
-      return {...sessionToken, ...{tenant: 'tenant'}};
+      return {...sessionToken, ...{multiFlag: true, tenant: 'tenant'}};
     });
         // @ts-ignore
-    handlerOptions.multiTenantOptions?.multiTenantJson = () => { return {"auth-server-url": "http://localhost:8090/auth/"}; };
+    handlerOptions.multiTenantOptions.multiTenantJson = () => { return {"auth-server-url": "http://localhost:8090/auth/"}; };
     const logout = new DefaultLogout(handlerOptions);
     let redirect = false;
     await logout.logout(request, {...response, ...{redirect: (code: number, url: string) => {

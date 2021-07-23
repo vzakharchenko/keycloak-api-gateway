@@ -1,3 +1,5 @@
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {
     Options,
 } from "../index";
@@ -16,16 +18,16 @@ import {SingleTenantUrlPageHandler} from "../handlers/SingleTenantUrlPageHandler
 /**
  * default Page Handler
  */
-export const defaultPageHandlers = [
+export const defaultPageHandlers = (enforcer?: EnforcerFunction) => ([
   new TenantInternalPage('/tenants', 35000),
   new PublicUrlPageHandler('(.*)(/public)(.*)', 10000),
   new PublicUrlPageHandler('(.*)(.(jpg|jpeg|png|gif|bmp))', 10000),
   new PublicUrlPageHandler('(.*)(.(ico|tiff))', 10000),
   new PublicUrlPageHandler('(.*)(.(css))', 10000),
   new TokenPageHandler("/token"),
-  new SingleTenantUrlPageHandler("/", 0),
-  new SingleTenantUrlPageHandler("/index.html", 32000),
-];
+  new SingleTenantUrlPageHandler("/", 0, enforcer),
+  new SingleTenantUrlPageHandler("/index.html", 32000, enforcer),
+]);
 
 function transform(opts: APIGateWayOptions): Options {
 
@@ -52,6 +54,7 @@ function transform(opts: APIGateWayOptions): Options {
       idp: opts.identityProviders?.multiTenant,
     };
   }
+  options.defaultAuthorization = opts.defaultAuthorization;
   return options;
 }
 
@@ -81,7 +84,7 @@ export function initOptions(opts: APIGateWayOptions | Options): Options {
     }
   }
   if (!options.pageHandlers || options.pageHandlers.length === 0) {
-    options.pageHandlers = defaultPageHandlers;
+    options.pageHandlers = defaultPageHandlers(options.defaultAuthorization);
   }
   return options;
 }

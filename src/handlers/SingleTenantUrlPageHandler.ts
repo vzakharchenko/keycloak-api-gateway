@@ -15,12 +15,12 @@ export class SingleTenantUrlPageHandler implements PageHandler {
 
   readonly url: string;
   readonly orderValue: number | undefined;
-  readonly enforcer?: EnforcerFunction;
+  readonly authorization?: EnforcerFunction;
 
-  constructor(url: string, orderValue?: number | undefined, enforcer?: EnforcerFunction) {
+  constructor(url: string, orderValue?: number | undefined, authorization?: EnforcerFunction) {
     this.url = url;
     this.orderValue = orderValue;
-    this.enforcer = enforcer;
+    this.authorization = authorization;
   }
 
   getAccessLevel(): AccessLevel {
@@ -48,7 +48,7 @@ export class SingleTenantUrlPageHandler implements PageHandler {
     if (!singleTenantAdapter) {
       throw new Error('singleTenantAdapter does not defined');
     }
-    const token = await singleTenantAdapter.singleTenant(req, res, next, this.enforcer);
+    const token = await singleTenantAdapter.singleTenant(req, res, next, this.authorization);
     if (token) {
       next();
     }

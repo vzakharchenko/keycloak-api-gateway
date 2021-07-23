@@ -50,10 +50,28 @@
       "email": "example-user@example",
       "firstName": "Lambda",
       "lastName": "User",
+      "clientRoles": {
+        "express-example": [
+          "Client Role"
+        ]
+      },
       "credentials": [
         {
           "type": "password",
           "value": "user"
+        }
+      ]
+    },
+    {
+      "username": "user2",
+      "enabled": true,
+      "email": "example-user2@example",
+      "firstName": "Lambda",
+      "lastName": "User2",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user2"
         }
       ]
     }
@@ -316,7 +334,15 @@
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
-      "express-example": [],
+      "express-example": [
+        {
+          "name": "Client Role",
+          "description": "Client Role",
+          "composite": false,
+          "clientRole": true,
+          "attributes": {}
+        }
+      ],
       "broker": [
         {
           "id": "c0fd3bfa-c61a-459b-9a43-a822d8d535d2",
