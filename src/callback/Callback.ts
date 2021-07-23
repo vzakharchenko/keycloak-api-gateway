@@ -51,7 +51,7 @@ export class DefaultCallback implements Callback {
           throw new Error('Multi-tenant Options does not defined');
         }
         const keycloakJson = await this.options.multiTenantOptions.multiTenantJson(state.tenant);
-          const multitenantOptions = updateOptions(
+        const multitenantOptions = updateOptions(
               {...this.options.multiTenantOptions.multiTenantAdapterOptions, ...{keycloakJson}},
           );
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
