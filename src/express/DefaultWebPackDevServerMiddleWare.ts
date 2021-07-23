@@ -1,7 +1,6 @@
 import cookieParser from 'cookie-parser';
 
-import {ApiGateway, APIGateWayOptions, DefaultApiGateway} from "../apigateway/ApiGateway";
-import {Options} from "../index";
+import {ApiGateway} from "../apigateway/ApiGateway";
 
 export class WebPackDevServerMiddleWare {
   private apiGateway: ApiGateway;

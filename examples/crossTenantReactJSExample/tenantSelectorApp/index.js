@@ -7,7 +7,7 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
 const KeycloakAdapter = require('keycloak-lambda-authorizer/dist/Adapter');
-const {getKeycloakUrl,getUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
+const {getKeycloakUrl, getUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
 
 const {fetchData, sendData} = require('./restCalls');
 
@@ -17,7 +17,8 @@ function getMaterKeycloakJSON() {
   return JSON.parse(fs.readFileSync(`${__dirname}/master-keycloak.json`, 'utf8'));
 }
 
-const serviceAccount = new KeycloakAdapter.default({keycloakJson:getMaterKeycloakJSON}).getServiceAccount();
+// eslint-disable-next-line babel/new-cap
+const serviceAccount = new KeycloakAdapter.default({keycloakJson: getMaterKeycloakJSON}).getServiceAccount();
 
 const memoryStore = new session.MemoryStore();
 
@@ -64,7 +65,7 @@ app.post('/requestAccess', keycloak.protect(), keycloak.enforcer(['Request-acces
   const userName = request.kauth.grant.access_token.content.preferred_username;
   const userId = request.kauth.grant.access_token.content.sub;
   const keycloakJSon = getMaterKeycloakJSON();
-  const token = await serviceAccount.getServiceAccountToken({request:request});
+  const token = await serviceAccount.getServiceAccountToken({request});
   let res = await sendData(`${getKeycloakUrl(keycloakJSon)}/admin/realms/${request.query.tenant}/users`, 'POST', JSON.stringify({
     enabled: false,
     attributes: {},
@@ -94,7 +95,7 @@ app.get('/', keycloak.protect(), keycloak.enforcer(['Tenant-List']), async (requ
   const userName = request.kauth.grant.access_token.content.preferred_username;
   const keycloakJSon = getMaterKeycloakJSON();
   try {
-    const token = await serviceAccount.getServiceAccountToken({request:request});
+    const token = await serviceAccount.getServiceAccountToken({request});
     let res = await fetchData(`${getKeycloakUrl(keycloakJSon)}/admin/realms`, 'GET', {
       Authorization: `Bearer ${token}`,
     });

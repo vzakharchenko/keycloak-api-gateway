@@ -15,7 +15,9 @@ function getKeycloakJSON() {
   return JSON.parse(fs.readFileSync(`${__dirname}/keycloak.json`, 'utf8'));
 }
 
-const serviceAccount = new KeycloakAdapter.default({keycloakJson:getKeycloakJSON,}).getServiceAccount();
+// eslint-disable-next-line babel/new-cap
+const serviceAccount = new KeycloakAdapter.default({keycloakJson: getMaterKeycloakJSON}).getServiceAccount();
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.engine('.hbs', exphbs({
