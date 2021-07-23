@@ -20,8 +20,8 @@ Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web 
 - easily transform to aws lambda@edge
 
 # Examples
-- [Single Tenant ReactJS Application](./examples/reactJSExample)
-- [Multi-tenant  ReactJS Application with Tenant selector](./examples/multiTenantReactJSExample)
+- [Single Tenant ReactJS Application (Authorization based on Client Role)](./examples/reactJSExample)
+- [Multi-tenant  ReactJS Application with Tenant selector (Authorization based on Realm Role)](./examples/multiTenantReactJSExample)
 - [Cross-tenant  ReactJS Application with Tenant selector and approval proccess (Authorization based on security resources)](./examples/crossTenantReactJSExample)
 - [Custom Storage example](./examples/customStorageExample)
 
