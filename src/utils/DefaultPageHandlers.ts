@@ -1,10 +1,12 @@
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {
     Options,
 } from "../index";
 import {DefaultSessionManager} from "../session/SessionManager";
 import {APIGateWayOptions} from "../apigateway/ApiGateway";
 import {DefaultLogout} from "../logout/Logout";
-import {DefaultJWKS} from "../jwks/JWKS";
+import {DefaultUrlJWKS} from "../jwks/UrlJWKS";
 import {DefaultCallback} from "../callback/Callback";
 import {DefaultTenantAdapter} from "../tenant/TenantAdapter";
 import {DefaultMultiTenantAdapter} from "../multitenants/Multi-tenant-adapter";
@@ -16,18 +18,19 @@ import {SingleTenantUrlPageHandler} from "../handlers/SingleTenantUrlPageHandler
 /**
  * default Page Handler
  */
-export const defaultPageHandlers = [
+export const defaultPageHandlers = (enforcer?: EnforcerFunction) => ([
   new TenantInternalPage('/tenants', 35000),
   new PublicUrlPageHandler('(.*)(/public)(.*)', 10000),
   new PublicUrlPageHandler('(.*)(.(jpg|jpeg|png|gif|bmp))', 10000),
   new PublicUrlPageHandler('(.*)(.(ico|tiff))', 10000),
   new PublicUrlPageHandler('(.*)(.(css))', 10000),
   new TokenPageHandler("/token"),
-  new SingleTenantUrlPageHandler("/", 0),
-  new SingleTenantUrlPageHandler("/index.html", 32000),
-];
+  new SingleTenantUrlPageHandler("/", 0, enforcer),
+  new SingleTenantUrlPageHandler("/index.html", 32000, enforcer),
+]);
 
 function transform(opts: APIGateWayOptions): Options {
+
   const options: Options = {
     session: {
       sessionConfiguration: {
@@ -37,6 +40,8 @@ function transform(opts: APIGateWayOptions): Options {
       },
     },
     singleTenantOptions: {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       defaultAdapterOptions: opts.defaultAdapterOptions,
       idp: opts.identityProviders?.singleTenant,
     },
@@ -49,6 +54,7 @@ function transform(opts: APIGateWayOptions): Options {
       idp: opts.identityProviders?.multiTenant,
     };
   }
+  options.defaultAuthorization = opts.defaultAuthorization;
   return options;
 }
 
@@ -58,7 +64,7 @@ export function initOptions(opts: APIGateWayOptions | Options): Options {
     options.logout = new DefaultLogout(options);
   }
   if (!options.jwks) {
-    options.jwks = new DefaultJWKS(options);
+    options.jwks = new DefaultUrlJWKS(options);
   }
   if (!options.session.sessionManager) {
     options.session.sessionManager = new DefaultSessionManager(options);
@@ -66,20 +72,19 @@ export function initOptions(opts: APIGateWayOptions | Options): Options {
   if (!options.callback) {
     options.callback = new DefaultCallback(options);
   }
-  if (!options.singleTenantOptions) {
-    options.singleTenantOptions = {
-    };
+  if (options.singleTenantOptions) {
+    if (!options.singleTenantOptions.singleTenantAdapter) {
+      options.singleTenantOptions.singleTenantAdapter = new DefaultTenantAdapter(options);
+    }
   }
-  if (!options.singleTenantOptions.singleTenantAdapter) {
-    options.singleTenantOptions.singleTenantAdapter = new DefaultTenantAdapter(options);
-  }
+
   if (options.multiTenantOptions) {
     if (!options.multiTenantOptions.multiTenantAdapter) {
       options.multiTenantOptions.multiTenantAdapter = new DefaultMultiTenantAdapter(options);
     }
   }
   if (!options.pageHandlers || options.pageHandlers.length === 0) {
-    options.pageHandlers = defaultPageHandlers;
+    options.pageHandlers = defaultPageHandlers(options.defaultAuthorization);
   }
   return options;
 }

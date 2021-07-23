@@ -3,8 +3,8 @@ const path = require('path');
 
 const express = require('express');
 const exphbs = require('express-handlebars');
-const {serviceAccountJWT} = require('keycloak-lambda-authorizer/src/serviceAccount');
-const {getKeycloakUrl, getUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
+const KeycloakAdapter = require('keycloak-lambda-authorizer/dist/Adapter');
+const {getKeycloakUrl, getUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
 const bodyParser = require('body-parser');
 
 const {fetchData, sendData} = require('./restCalls');
@@ -14,6 +14,9 @@ const app = express();
 function getKeycloakJSON() {
   return JSON.parse(fs.readFileSync(`${__dirname}/keycloak.json`, 'utf8'));
 }
+
+// eslint-disable-next-line babel/new-cap
+const serviceAccount = new KeycloakAdapter.default({keycloakJson: getMaterKeycloakJSON}).getServiceAccount();
 
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -43,7 +46,7 @@ app.get('/', async (request, response) => {
 
   const keycloakJSon = getKeycloakJSON();
   try {
-    const token = await serviceAccountJWT(keycloakJSon, {});
+    const token = await serviceAccount.getServiceAccountToken({request});
     let res = await fetchData(`${getKeycloakUrl(keycloakJSon)}/admin/realms`, 'GET', {
       Authorization: `Bearer ${token}`,
     });

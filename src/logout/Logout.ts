@@ -1,13 +1,15 @@
-import {getCurrentHost, getKeycloakJsonFunction, getSessionName} from "../utils/KeycloakUtils";
+import {updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
+
+import {getCurrentHost, getSessionName} from "../utils/KeycloakUtils";
 import {Options, RequestObject, ResponseObject} from "../index";
 import {getSessionToken} from "../session/SessionManager";
 
-const {getKeycloakUrl} = require('keycloak-lambda-authorizer/src/utils/restCalls');
+const {getKeycloakUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
 
 export interface Logout {
   isLogout(request: RequestObject):boolean;
   redirectDefaultLogout(req:RequestObject, res:ResponseObject):Promise<void>|void
-  redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string):Promise<void>|void
+  redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string, redirectUrl?: string):Promise<void>|void
   logout(request: RequestObject, res: ResponseObject):Promise<void>|void
 }
 
@@ -27,13 +29,22 @@ export class DefaultLogout implements Logout {
     if (!this.options.singleTenantOptions) {
       throw new Error('singleTenantOptions does not defined');
     }
-    const keycloakJson = await getKeycloakJsonFunction(this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const keycloakJson = await updateOptions({...this.options.singleTenantOptions.defaultAdapterOptions}).keycloakJson(this.options.singleTenantOptions.defaultAdapterOptions, {
+      request: req,
+      token: null,
+    });
     res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/logout?redirect_uri=${getCurrentHost(req)}/`);
   }
 
-  async redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string) {
+  async redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string, redirectUrl?: string) {
     const keycloakJson = await this.options.multiTenantOptions?.multiTenantJson(tenantName);
-    res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${tenantName}/protocol/openid-connect/logout?redirect_uri=${getCurrentHost(req)}/tenants/${tenantName}`);
+    // eslint-disable-next-line babel/camelcase
+    const kc_idp_hint = req.query.kc_idp_hint || this.options.multiTenantOptions?.idp;
+    // eslint-disable-next-line babel/camelcase
+    const tenantHint = kc_idp_hint ? `&kc_idp_hint=${kc_idp_hint}` : '';
+    res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${tenantName}/protocol/openid-connect/logout?redirect_uri=${redirectUrl || `${getCurrentHost(req)}/tenants/${tenantName}`}${tenantHint}`);
   }
 
   async logout(request: RequestObject, res: ResponseObject): Promise<void> {
@@ -48,7 +59,7 @@ export class DefaultLogout implements Logout {
         throw new Error('singleTenantOptions does not defined');
       }
       await this.options.singleTenantOptions.singleTenantAdapter?.redirectTenantLogin(request, res);
-    } else if (sessionToken.tenant) {
+    } else if (sessionToken.multiFlag && sessionToken.tenant) {
             // MultiTenant User
       await this.redirectTenantLogout(request, res, sessionToken.tenant);
     } else {

@@ -20,6 +20,8 @@ const apiConfig = {
     }
 };
 
+const authorization = {resource: {name: 'Multi-tenant-Resource'}};
+
 const keycloakApiGateWayAdapter = new adapter.KeycloakApiGateWayAdapter(
     apiConfig
 )
@@ -35,10 +37,10 @@ const keycloakApiGateWayAdapter = new adapter.KeycloakApiGateWayAdapter(
     .addCustomPageHandler(new TenantExternalPage("/", {
         redirectedUrl: "http://localhost:8083",
         applicationName: 'multiTenantreactJsExample'
-    }, 0))
+    }, 0, authorization))
     .addCustomPageHandler(new TenantExternalPage("/index.html", {
         redirectedUrl: "http://localhost:8083",
         applicationName: 'multiTenantreactJsExample'
-    }, 32000))
+    }, 32000, authorization))
 
 module.exports = keycloakApiGateWayAdapter

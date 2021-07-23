@@ -1,5 +1,4 @@
-import {ApiGateway, APIGateWayOptions, DefaultApiGateway} from "../apigateway/ApiGateway";
-import {Options} from "../index";
+import {ApiGateway} from "../apigateway/ApiGateway";
 
 export interface ExpressMiddleWare {
 

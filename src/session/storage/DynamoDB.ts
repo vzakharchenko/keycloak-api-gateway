@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk';
+import {TokenJson} from "keycloak-lambda-authorizer/dist/src/Options";
 
 import {StrorageDB, StrorageDBType} from "./Strorage";
 
@@ -67,7 +68,7 @@ export class DynamoDB implements StrorageDB {
   async saveSession(sessionId: string,
                       keycloakSession: string,
                       exp: number, email: string,
-                      externalToken: any): Promise<void> {
+                      externalToken: TokenJson): Promise<void> {
     await this.dynamodb.putItem({
       TableName: this.dynamoDbSettings.tableName,
       Item: {
@@ -91,7 +92,7 @@ export class DynamoDB implements StrorageDB {
     logger.debug(`session: ${sessionId} (${email}) saved`);
   }
 
-  async updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
+  async updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {
     logger.debug(`begin update session: ${sessionId} (${email}) ${JSON.stringify(externalToken)}`);
     await this.dynamodb.updateItem({
       TableName: this.dynamoDbSettings.tableName,

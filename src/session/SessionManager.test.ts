@@ -2,6 +2,7 @@
 */
 import 'jest';
 import {decode} from "jsonwebtoken";
+import {TokenJson} from "keycloak-lambda-authorizer/dist/src/Options";
 
 import {RequestObject, ResponseObject} from "../index";
 import {APIGateWayOptions} from "../apigateway/ApiGateway";
@@ -30,9 +31,11 @@ const sessionToken:SessionToken = {
 
 };
 
+
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
@@ -77,14 +80,15 @@ class DummyStorage implements StrorageDB {
   }
 
   async getSessionIfExists(sessionId: string): Promise<StrorageDBType | null> {
+    // @ts-ignore
     return {session: '1', exp: 1000, keycloakSession: 'sessionState', email: '1@1.tt', externalToken: {}};
   }
 
-  async saveSession(sessionId: string, keycloakSession: string, exp: number, email: string, externalToken: any): Promise<void> {
+  async saveSession(sessionId: string, keycloakSession: string, exp: number, email: string, externalToken: TokenJson): Promise<void> {
 
   }
 
-  async updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
+  async updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {
 
   }
 
@@ -142,10 +146,12 @@ describe('SessionManager tests', () => {
 
   test('test SessionManager createSession update', async () => {
     const sessionManager = new DefaultSessionManager(handlerOptions);
+    // @ts-ignore
     await sessionManager.updateSession('sessionId', 'email', {access_token: 'a', refresh_token: 'r'});
   });
   test('test SessionManager createSession update', async () => {
     const sessionManager = new DefaultSessionManager(handlerOptions);
+    // @ts-ignore
     await sessionManager.updateSession('sessionId', 'email', {access_token: 'a', refresh_token: 'r'});
   });
 
@@ -158,10 +164,11 @@ describe('SessionManager tests', () => {
   test('test SessionManager createSession getSessionAccessToken null', async () => {
     const sessionManager = new DefaultSessionManager(handlerOptions);
     const session = await sessionManager.getSessionAccessToken({...sessionToken, sessionState: '1'});
-    expect(session).toEqual(null);
+    expect(session).toEqual(undefined);
   });
   test('test SessionManager createSession success', async () => {
     const sessionManager = new DefaultSessionManager(handlerOptions);
+    // @ts-ignore
     const sessionId = await sessionManager.createSession(request, keycloakState, {access_token: 'a', refresh_token: 'r'});
     expect(sessionId).toHaveLength(sessionId.length);
   });

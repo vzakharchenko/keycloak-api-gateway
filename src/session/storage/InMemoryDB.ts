@@ -1,5 +1,7 @@
 import fs from 'fs';
 
+import {TokenJson} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {pathUtils} from './PathUtils';
 import {StrorageDB, StrorageDBType} from "./Strorage";
 
@@ -66,7 +68,7 @@ export class InMemoryDB implements StrorageDB {
                       keycloakSession: string,
                       exp: number,
                       email: string,
-                      externalToken: any):
+                      externalToken: TokenJson):
         Promise<void> {
     this.inMemory[sessionId] = {
       session: sessionId,
@@ -78,7 +80,7 @@ export class InMemoryDB implements StrorageDB {
     this.saveStorage(this.inMemory);
   }
 
-  async updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
+  async updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {
     const sessionObject = this.inMemory[sessionId];
     if (sessionObject) {
       sessionObject.externalToken = externalToken;

@@ -3,6 +3,8 @@
 
 import 'jest';
 
+import {TokenJson} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {RequestObject, ResponseObject} from "../index";
 import {APIGateWayOptions} from "../apigateway/ApiGateway";
 import {StrorageDB, StrorageDBType} from "../session/storage/Strorage";
@@ -15,7 +17,6 @@ import {
   getCurrentStorage,
   getCustomPageHandler,
   getHostName,
-  getKeycloakJsonFunction,
   getSessionName, isCustomBehavior,
 } from "./KeycloakUtils";
 
@@ -48,18 +49,20 @@ class DummyStorageDB implements StrorageDB {
     return null;
   }
 
-  saveSession(sessionId: string, keycloakSession: string, exp: number, email: string, externalToken: any): Promise<void> {
+  saveSession(sessionId: string, keycloakSession: string, exp: number, email: string, externalToken: TokenJson): Promise<void> {
     return Promise.resolve(undefined);
   }
 
-  updateSession(sessionId: string, email: string, externalToken: any): Promise<void> {
+  updateSession(sessionId: string, email: string, externalToken: TokenJson): Promise<void> {
     return Promise.resolve(undefined);
   }
 
 }
+
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
@@ -129,10 +132,6 @@ describe('KeycloakUtils tests', () => {
   test('test PublicUrlPageHandler getCurrentStorage CustomDB', async () => {
     handlerOptions.session.sessionConfiguration.storageType = new DummyStorageDB();
     await getCurrentStorage(handlerOptions);
-  });
-
-  test('test PublicUrlPageHandler getCurrentStorage getKeycloakJsonFunction', async () => {
-    expect(await getKeycloakJsonFunction({})).toEqual({});
   });
 
   test('test PublicUrlPageHandler getCurrentStorage isCustomBehavior 1', async () => {

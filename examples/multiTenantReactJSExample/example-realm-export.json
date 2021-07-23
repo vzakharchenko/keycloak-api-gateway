@@ -49,6 +49,7 @@
       "email": "tenant1@example.com",
       "firstName": "tenant1",
       "lastName": "User",
+      "realmRoles": ["Multi-tenant-Role"],
       "credentials": [
         {
           "type": "password",
@@ -62,6 +63,14 @@
       {
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "tenant1",
+        "attributes": {}
+      },
+      {
+        "name": "Multi-tenant-Role",
+        "description": "Multi-tenant-Role",
         "composite": false,
         "clientRole": false,
         "containerId": "tenant1",

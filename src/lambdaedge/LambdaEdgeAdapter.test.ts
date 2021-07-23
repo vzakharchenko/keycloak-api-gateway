@@ -30,6 +30,7 @@ class DummyApiGateway implements ApiGateway {
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {

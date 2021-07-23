@@ -1,8 +1,8 @@
-import {DefaultSessionManager} from "../session/SessionManager";
-import {Options, RequestObject, ResponseObject} from "../index";
-import {getCurrentHost, getSessionName, getTokenByCode, KeycloakState} from "../utils/KeycloakUtils";
+import {AdapterContent, updateOptions} from "keycloak-lambda-authorizer/dist/src/Options";
 
-const {commonOptions} = require('keycloak-lambda-authorizer/src/utils/optionsUtils');
+import {Options, RequestObject, ResponseObject} from "../index";
+import {getCurrentHost, getSessionName, KeycloakState} from "../utils/KeycloakUtils";
+
 
 export interface Callback {
 
@@ -24,6 +24,7 @@ export interface Callback {
 export class DefaultCallback implements Callback {
 
   private options: Options;
+  private singleOptions:AdapterContent|null = null;
 
   constructor(options: Options) {
     this.options = options;
@@ -50,9 +51,15 @@ export class DefaultCallback implements Callback {
           throw new Error('Multi-tenant Options does not defined');
         }
         const keycloakJson = await this.options.multiTenantOptions.multiTenantJson(state.tenant);
-        token = await getTokenByCode(code, currentHost, {
-          ...commonOptions(this.options.multiTenantOptions.multiTenantAdapterOptions, keycloakJson),
-        }, keycloakJson);
+        const multitenantOptions = updateOptions(
+              {...this.options.multiTenantOptions.multiTenantAdapterOptions, ...{keycloakJson}},
+          );
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        token = await multitenantOptions.clientAuthorization.getTokenByCode({
+          request: req,
+          realm: state.tenant,
+        }, code, `${currentHost}/callbacks/${keycloakJson.realm}/${keycloakJson.resource}/callback`);
         sessionId = await this.options.session.sessionManager.createSession(req, state, token);
       } else {
         if (!this.options.singleTenantOptions) {
@@ -61,12 +68,20 @@ export class DefaultCallback implements Callback {
         if (!this.options.singleTenantOptions.defaultAdapterOptions) {
           throw new Error('Default Adapter Options does not defined');
         }
-        token = await getTokenByCode(code, currentHost,
-          {
-            ...commonOptions(this.options.singleTenantOptions.defaultAdapterOptions,
-                            this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson),
-          },
-                    this.options.singleTenantOptions.defaultAdapterOptions.keycloakJson);
+        if (!this.singleOptions) {
+          this.singleOptions = updateOptions(this.options.singleTenantOptions.defaultAdapterOptions);
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const keycloakJson = await this.singleOptions.keycloakJson(this.singleOptions, {
+          request: req,
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        token = await this.singleOptions.clientAuthorization.getTokenByCode({
+          request: req,
+          realm: state.tenant,
+        }, code, `${currentHost}/callbacks/${keycloakJson.realm}/${keycloakJson.resource}/callback`);
         sessionId = await this.options.session.sessionManager.createSession(req, state, token);
       }
       res.cookie(getSessionName(this.options), sessionId);

@@ -7,6 +7,7 @@ import {RequestObject, ResponseObject} from "../index";
 import {initOptions} from "../utils/DefaultPageHandlers";
 import {APIGateWayOptions} from "../apigateway/ApiGateway";
 import {getSessionToken, SessionToken} from "../session/SessionManager";
+import {DummyClientAuthorization} from "../utils/DummyImplementations.test";
 
 import {DefaultLogout} from "./Logout";
 
@@ -46,7 +47,10 @@ const response: ResponseObject = {
 
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
-  multiTenantAdapterOptions: {},
+  multiTenantAdapterOptions: {
+    clientAuthorization: new DummyClientAuthorization(),
+  },
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
@@ -94,8 +98,10 @@ describe('Logout tests', () => {
   });
 
   test('test Logout redirectDefaultLogout', async () => {
+    // @ts-ignore
+    handlerOptions.singleTenantOptions = {defaultAdapterOptions: {}};
         // @ts-ignore
-    handlerOptions.singleTenantOptions.defaultAdapterOptions = {keycloakJson: {"auth-server-url": "http://localhost:8090/auth/"}};
+    handlerOptions.singleTenantOptions.defaultAdapterOptions.keycloakJson = () => ({"auth-server-url": "http://localhost:8090/auth/"});
     const logout = new DefaultLogout(handlerOptions);
     let redirect = false;
     await logout.redirectDefaultLogout(request, {...response, ...{redirect: (code: number, url: string) => {
@@ -137,8 +143,10 @@ describe('Logout tests', () => {
 
 
   test('test Logout single tenant logout', async () => {
+    // @ts-ignore
+    handlerOptions.singleTenantOptions = {defaultAdapterOptions: {}};
         // @ts-ignore
-    handlerOptions.singleTenantOptions.defaultAdapterOptions = {keycloakJson: {"auth-server-url": "http://localhost:8090/auth/"}};
+    handlerOptions.singleTenantOptions.defaultAdapterOptions.keycloakJson = () => ({"auth-server-url": "http://localhost:8090/auth/"});
     const logout = new DefaultLogout(handlerOptions);
     let redirect = false;
     await logout.logout(request, {...response, ...{redirect: (code: number, url: string) => {
@@ -187,10 +195,10 @@ describe('Logout tests', () => {
   test('test Logout multi-tenant logout', async () => {
         // @ts-ignore
     getSessionToken.mockImplementation(() => {
-      return {...sessionToken, ...{tenant: 'tenant'}};
+      return {...sessionToken, ...{multiFlag: true, tenant: 'tenant'}};
     });
         // @ts-ignore
-    handlerOptions.multiTenantOptions?.multiTenantJson = () => { return {"auth-server-url": "http://localhost:8090/auth/"}; };
+    handlerOptions.multiTenantOptions.multiTenantJson = () => { return {"auth-server-url": "http://localhost:8090/auth/"}; };
     const logout = new DefaultLogout(handlerOptions);
     let redirect = false;
     await logout.logout(request, {...response, ...{redirect: (code: number, url: string) => {

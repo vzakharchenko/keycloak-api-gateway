@@ -1,3 +1,5 @@
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {
     AccessLevel,
     RequestObject,
@@ -9,7 +11,8 @@ import {BehaviorContext, CustomPageHandlerContext, PageHandler} from "./PageHand
 export async function getActiveToken(req:RequestObject,
                                      res:ResponseObject,
                                      next:any,
-                                     context:CustomPageHandlerContext):Promise<any> {
+                                     context:CustomPageHandlerContext,
+                                     authorization?: EnforcerFunction):Promise<any> {
 
   if (!context.sessionToken) {
     throw new Error('sessionToken does not defined');
@@ -20,7 +23,7 @@ export async function getActiveToken(req:RequestObject,
       throw new Error('multiTenantOptions does not defined');
     }
     const multiTenantAdapter = context.options.multiTenantOptions.multiTenantAdapter;
-    token = await multiTenantAdapter.tenant(req, res, next);
+    token = await multiTenantAdapter.tenant(req, res, next, authorization);
 
   } else {
     if (!context.options.singleTenantOptions) {
@@ -30,7 +33,7 @@ export async function getActiveToken(req:RequestObject,
       throw new Error('singleTenantAdapter does not defined');
     }
     const singleTenantAdapter = context.options.singleTenantOptions.singleTenantAdapter;
-    token = await singleTenantAdapter.singleTenant(req, res, next);
+    token = await singleTenantAdapter.singleTenant(req, res, next, authorization);
   }
   return token;
 }
@@ -43,8 +46,9 @@ export async function getActiveToken(req:RequestObject,
 export class TokenPageHandler implements PageHandler {
 
   readonly url: string;
+  readonly enforcer?: EnforcerFunction;
 
-  constructor(url: string) {
+  constructor(url: string, enforcer?: EnforcerFunction) {
     this.url = url;
   }
 
@@ -60,7 +64,7 @@ export class TokenPageHandler implements PageHandler {
                   res: ResponseObject,
                   next: any,
                   context: CustomPageHandlerContext): Promise<void> {
-    const token = await getActiveToken(req, res, next, context);
+    const token = await getActiveToken(req, res, next, context, this.enforcer);
     const ret = {activeToken: token.access_token};
     res.json(ret);
   }

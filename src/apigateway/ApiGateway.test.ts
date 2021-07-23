@@ -1,11 +1,13 @@
 /* eslint-disable no-empty-function, no-shadow, @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
 */
 import 'jest';
+import {EnforcerFunction} from "keycloak-lambda-authorizer/dist/src/Options";
+
 import {AccessLevel, Options, RequestObject, ResponseObject} from "../index";
 import {initOptions} from "../utils/DefaultPageHandlers";
 import {Logout} from "../logout/Logout";
 import {Callback} from "../callback/Callback";
-import {JWKS} from "../jwks/JWKS";
+import {UrlJWKS} from "../jwks/UrlJWKS";
 import {TenantAdapter} from "../tenant/TenantAdapter";
 import {MultiTenantAdapter} from "../multitenants/Multi-tenant-adapter";
 import {getCustomPageHandler} from "../utils/KeycloakUtils";
@@ -61,7 +63,7 @@ export class DummyLogout implements Logout {
   }
 }
 
-export class DummyJWKS implements JWKS {
+export class DummyJWKS implements UrlJWKS {
   private isRequest: boolean;
 
   constructor(isRequest: boolean) {
@@ -72,7 +74,7 @@ export class DummyJWKS implements JWKS {
     return this.isRequest;
   }
 
-  async jwks(req: RequestObject, res: ResponseObject): Promise<void> {
+  async getPublicKey(req: RequestObject, res: ResponseObject): Promise<void> {
     throw new Error('jwks');
   }
 
@@ -109,7 +111,7 @@ export class DummyTenantAdapter implements TenantAdapter {
     return Promise.resolve(undefined);
   }
 
-  async singleTenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
+  async singleTenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any> {
     if (this.tenantCheck || this.tenantCheck === '') {
       if (this.tenantCheck) {
         next(this.tenantCheck);
@@ -245,6 +247,7 @@ describe('ApiGateway tests', () => {
   });
 
   test('test singleTenant error2', async () => {
+    // @ts-ignore
     const apiGateway = new DefaultApiGateway({
       ...options,
       ...{
@@ -268,6 +271,7 @@ describe('ApiGateway tests', () => {
   });
 
   test('test singleTenant', async () => {
+    // @ts-ignore
     const apiGateway = new DefaultApiGateway({
       ...options,
       ...{
@@ -303,6 +307,7 @@ describe('ApiGateway tests', () => {
         },
       };
     });
+    // @ts-ignore
     const apiGateway = new DefaultApiGateway({
       ...options,
       ...{
@@ -338,6 +343,7 @@ describe('ApiGateway tests', () => {
       }
       return null;
     });
+    // @ts-ignore
     const apiGateway = new DefaultApiGateway({
       ...options,
       ...{

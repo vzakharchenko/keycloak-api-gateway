@@ -38,6 +38,7 @@ const response: ResponseObject = {
 const defOptions: APIGateWayOptions = {
   storageType: 'InMemoryDB',
   multiTenantAdapterOptions: {},
+  // @ts-ignore
   multiTenantJson: () => "test",
   keys: {
     privateKey: {
