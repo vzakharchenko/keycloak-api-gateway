@@ -1,13 +1,14 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const express = require('express');
-const exphbs = require('express-handlebars');
-const KeycloakAdapter = require('keycloak-lambda-authorizer/dist/Adapter');
-const {getKeycloakUrl, getUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
-const bodyParser = require('body-parser');
+import express from 'express';
+import exphbs from 'express-handlebars';
+import bodyParser from 'body-parser';
+import KeycloakAdapter from 'keycloak-lambda-authorizer/dist/Adapter';
+import {getKeycloakUrl, getUrl} from 'keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils';
 
-const {fetchData, sendData} = require('./restCalls');
+import {fetchData} from './restCalls';
+
 
 const app = express();
 
@@ -15,8 +16,7 @@ function getKeycloakJSON() {
   return JSON.parse(fs.readFileSync(`${__dirname}/keycloak.json`, 'utf8'));
 }
 
-// eslint-disable-next-line babel/new-cap
-const serviceAccount = new KeycloakAdapter.default({keycloakJson: getMaterKeycloakJSON}).getServiceAccount();
+const serviceAccount = new KeycloakAdapter({keycloakJson: getKeycloakJSON()}).getServiceAccount();
 
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -30,19 +30,19 @@ app.set('view engine', '.hbs');
 
 app.set('views', path.join(__dirname, 'views'));
 
-function renderUI(request, response, data) {
+function renderUI(request:any, response:any, data:any) {
   response.render('home', {
     ...data,
   });
 }
 
 
-const asyncFilter = async (arr, predicate) => {
+const asyncFilter = async (arr:any, predicate:any) => {
   const results = await Promise.all(arr.map(predicate));
 
-  return arr.filter((_v, index) => results[index]);
+  return arr.filter((_v:any, index:any) => results[index]);
 };
-app.get('/', async (request, response) => {
+app.get('/', async (request:any, response) => {
 
   const keycloakJSon = getKeycloakJSON();
   try {
@@ -51,13 +51,13 @@ app.get('/', async (request, response) => {
       Authorization: `Bearer ${token}`,
     });
     const tenants = await asyncFilter(JSON
-            .parse(res).map((tenant) => {
+            .parse(res).map((tenant:any) => {
               return {
                 name: tenant.realm,
                 label: tenant.displayName,
                 redirectUri: `${getUrl(request.query.redirectUri || 'http://localhost:3000')}/tenants/${tenant.realm}`,
               };
-            }), async (tenant) => {
+            }), async (tenant:any) => {
       try {
         if (!request.query.app && tenant.name !== 'master') {
           return true;
@@ -85,6 +85,8 @@ app.get('/', async (request, response) => {
 
 const server = app.listen(8082, () => {
   const host = 'localhost';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const {port} = server.address();
   // eslint-disable-next-line no-console
   console.log('Example app listening at http://%s:%s', host, port);

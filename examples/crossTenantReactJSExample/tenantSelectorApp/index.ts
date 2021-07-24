@@ -1,15 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const session = require('express-session');
-const Keycloak = require('keycloak-connect');
-const express = require('express');
-const exphbs = require('express-handlebars');
-const bodyParser = require('body-parser');
-const KeycloakAdapter = require('keycloak-lambda-authorizer/dist/Adapter');
-const {getKeycloakUrl, getUrl} = require('keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils');
+import session from 'express-session';
+import Keycloak from 'keycloak-connect';
+import express from 'express';
+import exphbs from 'express-handlebars';
+import bodyParser from 'body-parser';
+import KeycloakAdapter from 'keycloak-lambda-authorizer/dist/Adapter';
+import {getKeycloakUrl, getUrl} from 'keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils';
 
-const {fetchData, sendData} = require('./restCalls');
+import {fetchData, sendData} from './restCalls';
 
 const app = express();
 
@@ -17,8 +17,7 @@ function getMaterKeycloakJSON() {
   return JSON.parse(fs.readFileSync(`${__dirname}/master-keycloak.json`, 'utf8'));
 }
 
-// eslint-disable-next-line babel/new-cap
-const serviceAccount = new KeycloakAdapter.default({keycloakJson: getMaterKeycloakJSON}).getServiceAccount();
+const serviceAccount = new KeycloakAdapter({keycloakJson: getMaterKeycloakJSON}).getServiceAccount();
 
 const memoryStore = new session.MemoryStore();
 
@@ -49,23 +48,24 @@ app.set('view engine', '.hbs');
 
 app.set('views', path.join(__dirname, 'views'));
 
-function renderUI(request, response, data) {
+function renderUI(request:any, response:any, data:any) {
   response.render('home', {
     ...data,
   });
 }
 
 
-const asyncFilter = async (arr, predicate) => {
+const asyncFilter = async (arr:any, predicate:any) => {
   const results = await Promise.all(arr.map(predicate));
 
-  return arr.filter((_v, index) => results[index]);
+  return arr.filter((_v:any, index:any) => results[index]);
 };
-app.post('/requestAccess', keycloak.protect(), keycloak.enforcer(['Request-access']), async (request, response) => {
+
+app.post('/requestAccess', keycloak.protect(), keycloak.enforcer(['Request-access']), async (request:any, response) => {
   const userName = request.kauth.grant.access_token.content.preferred_username;
   const userId = request.kauth.grant.access_token.content.sub;
   const keycloakJSon = getMaterKeycloakJSON();
-  const token = await serviceAccount.getServiceAccountToken({request});
+  const token = await serviceAccount.getServiceAccountToken();
   let res = await sendData(`${getKeycloakUrl(keycloakJSon)}/admin/realms/${request.query.tenant}/users`, 'POST', JSON.stringify({
     enabled: false,
     attributes: {},
@@ -91,22 +91,22 @@ app.post('/requestAccess', keycloak.protect(), keycloak.enforcer(['Request-acces
   response.redirect("/");
 });
 
-app.get('/', keycloak.protect(), keycloak.enforcer(['Tenant-List']), async (request, response) => {
+app.get('/', keycloak.protect(), keycloak.enforcer(['Tenant-List']), async (request:any, response) => {
   const userName = request.kauth.grant.access_token.content.preferred_username;
   const keycloakJSon = getMaterKeycloakJSON();
   try {
-    const token = await serviceAccount.getServiceAccountToken({request});
+    const token = await serviceAccount.getServiceAccountToken();
     let res = await fetchData(`${getKeycloakUrl(keycloakJSon)}/admin/realms`, 'GET', {
       Authorization: `Bearer ${token}`,
     });
     const tenants = await asyncFilter(await Promise.all(JSON
-            .parse(res.data).map(async (tenant) => {
+            .parse(res.data).map(async (tenant:any) => {
               const state = {state: 'NEW'};
               res = await fetchData(`${getKeycloakUrl(keycloakJSon)}/admin/realms/${tenant.realm}/users?briefRepresentation=true&first=0&max=20&search=${userName}`, 'GET', {
                 Authorization: `Bearer ${token}`,
               });
               const parseUsers = JSON.parse(res.data);
-              if (parseUsers.filter((user) => {
+              if (parseUsers.filter((user:any) => {
                 return user.username === userName;
               }).length > 0) {
                 const user = parseUsers[0];
@@ -124,7 +124,7 @@ app.get('/', keycloak.protect(), keycloak.enforcer(['Tenant-List']), async (requ
                 label: tenant.displayName,
                 redirectUri: `${getUrl(request.query.redirectUri || 'http://localhost:3000')}/tenants/${tenant.realm}`,
               };
-            })), async (tenant) => {
+            })), async (tenant:any) => {
       try {
         if (!request.query.app && tenant.name !== 'master' && tenant.name !== 'Portal' && tenant.name !== 'portal') {
           return true;
@@ -152,6 +152,8 @@ app.get('/', keycloak.protect(), keycloak.enforcer(['Tenant-List']), async (requ
 
 const server = app.listen(8083, () => {
   const host = 'localhost';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const {port} = server.address();
     // eslint-disable-next-line no-console
   console.log('Example app listening at http://%s:%s', host, port);
