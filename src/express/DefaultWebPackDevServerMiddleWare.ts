@@ -16,8 +16,8 @@ export class WebPackDevServerMiddleWare {
       this.apiGateway.middleware.bind(this.apiGateway);
       app.use('/*', async (req: any, res: any, next: any) => {
         await this.apiGateway.middleware(req, res, next);
-      }, (req: any, res: any, next: any) => {
-        next();
+      }, async (req: any, res: any, next: any) => {
+        await next();
       });
     };
     return dServer;

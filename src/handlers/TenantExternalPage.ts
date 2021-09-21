@@ -124,8 +124,7 @@ export class TenantExternalPage implements PageHandler {
     if (!this.tenantExternalPage.alwaysRedirect && context.sessionToken) {
       const token = await getActiveToken(req, res, next, context, this.authorization);
       if (token) {
-        next();
-
+        await next();
       }
     } else {
       res.redirect(302, `${this.tenantExternalPage.redirectedUrl}?redirectUri=${getCurrentHost(req)}${this.tenantExternalPage.providePath

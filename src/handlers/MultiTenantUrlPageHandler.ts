@@ -49,7 +49,7 @@ export class MultiTenantUrlPageHandler implements PageHandler {
     if (await multiTenantAdapter.isMultiTenant(req)) {
       const token = await multiTenantAdapter.tenant(req, res, next, this.authorization);
       if (token) {
-        next();
+        await next();
       }
     }
   }

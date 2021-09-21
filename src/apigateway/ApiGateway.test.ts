@@ -114,7 +114,7 @@ export class DummyTenantAdapter implements TenantAdapter {
   async singleTenant(req: RequestObject, res: ResponseObject, next: any, enforcer?: EnforcerFunction): Promise<any> {
     if (this.tenantCheck || this.tenantCheck === '') {
       if (this.tenantCheck) {
-        next(this.tenantCheck);
+        await next(this.tenantCheck);
       }
       return this.tenantCheck;
     } else {
@@ -145,7 +145,7 @@ export class DummyMultiTenantAdapter implements MultiTenantAdapter {
   async tenant(req: RequestObject, res: ResponseObject, next: any): Promise<any> {
     if (this.tenantCheck || this.tenantCheck === '') {
       if (this.tenantCheck) {
-        next(this.tenantCheck);
+        await next(this.tenantCheck);
       }
       return this.tenantCheck;
     } else {

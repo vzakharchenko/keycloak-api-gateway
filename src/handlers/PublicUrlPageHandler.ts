@@ -36,8 +36,8 @@ export class PublicUrlPageHandler implements PageHandler {
     return Promise.resolve(this.getAccessLevel());
   }
 
-  execute(req: RequestObject, res: ResponseObject, next: any, context: CustomPageHandlerContext): void {
-    next();
+  async execute(req: RequestObject, res: ResponseObject, next: any, context: CustomPageHandlerContext): Promise<void> {
+    await next();
   }
 
 }

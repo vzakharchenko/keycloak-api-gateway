@@ -50,7 +50,7 @@ export class SingleTenantUrlPageHandler implements PageHandler {
     }
     const token = await singleTenantAdapter.singleTenant(req, res, next, this.authorization);
     if (token) {
-      next();
+      await next();
     }
   }
 
