@@ -50,6 +50,8 @@ export class SingleTenantUrlPageHandler implements PageHandler {
     }
     const token = await singleTenantAdapter.singleTenant(req, res, next, this.authorization);
     if (token) {
+      // eslint-disable-next-line require-atomic-updates
+      req.token = token;
       await next();
     }
   }

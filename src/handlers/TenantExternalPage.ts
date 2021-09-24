@@ -124,6 +124,8 @@ export class TenantExternalPage implements PageHandler {
     if (!this.tenantExternalPage.alwaysRedirect && context.sessionToken) {
       const token = await getActiveToken(req, res, next, context, this.authorization);
       if (token) {
+        // eslint-disable-next-line require-atomic-updates
+        req.token = token;
         await next();
       }
     } else {

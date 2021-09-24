@@ -2,7 +2,7 @@ import {
     AdapterDependencies,
     ClientJwtKeys, EnforcerFunction,
     KeycloakJsonStructure,
-    LoggerType,
+    LoggerType, TokenJson,
 } from "keycloak-lambda-authorizer/dist/src/Options";
 import {AdapterCache} from "keycloak-lambda-authorizer/dist/src/cache/AdapterCache";
 import {RestCalls} from "keycloak-lambda-authorizer/dist/src/utils/restCalls";
@@ -94,6 +94,7 @@ export type RequestObject = {
     cookies: CookieType,
     query: QueryType,
     headers: HeadersType,
+    token?: TokenJson,
     secure: boolean
 }
 

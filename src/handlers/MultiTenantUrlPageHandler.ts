@@ -49,6 +49,8 @@ export class MultiTenantUrlPageHandler implements PageHandler {
     if (await multiTenantAdapter.isMultiTenant(req)) {
       const token = await multiTenantAdapter.tenant(req, res, next, this.authorization);
       if (token) {
+        // eslint-disable-next-line require-atomic-updates
+        req.token = token;
         await next();
       }
     }
