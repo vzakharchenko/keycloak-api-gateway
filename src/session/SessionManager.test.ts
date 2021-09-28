@@ -183,7 +183,7 @@ describe('SessionManager tests', () => {
     try {
             // @ts-ignore
       const sessionId = await sessionManager.createSession(request, keycloakState, {access_token: null, refresh_token: 'r'});
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual("accessToken or refreshToken does not exists");
       error = true;
     }
@@ -201,7 +201,7 @@ describe('SessionManager tests', () => {
     try {
             // @ts-ignore
       const sessionId = await sessionManager.createSession(request, keycloakState, {access_token: 'a', refresh_token: null});
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual("accessToken or refreshToken does not exists");
       error = true;
     }

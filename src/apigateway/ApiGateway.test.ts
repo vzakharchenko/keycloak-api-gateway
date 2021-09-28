@@ -184,7 +184,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('LogoutObject is undefined');
     }
 
@@ -202,7 +202,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('jwks is undefined');
     }
 
@@ -220,7 +220,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('callback is undefined');
     }
 
@@ -240,7 +240,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenantAdapter is undefined');
     }
 
@@ -264,7 +264,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('Single tenant configuration does not defined');
     }
 
@@ -289,7 +289,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenant');
     }
 
@@ -325,7 +325,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('public');
     }
 
@@ -361,7 +361,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('single');
     }
 
@@ -387,7 +387,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('multiTenantOptions does not defined');
     }
 
@@ -427,7 +427,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('multi-tenant');
     }
 
@@ -457,7 +457,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenant');
     }
 
@@ -485,7 +485,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('tenant');
     }
 
@@ -514,7 +514,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('logout');
     }
 
@@ -543,7 +543,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('jwks');
     }
 
@@ -572,7 +572,7 @@ describe('ApiGateway tests', () => {
 
       });
       throw new Error("test not valid");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('callback');
     }
 

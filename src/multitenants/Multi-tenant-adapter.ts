@@ -117,7 +117,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
           tokenString: token.access_token,
         }, enforcerFunc);
         return token;
-      } catch (e) {
+      } catch (e:any) {
         returnToken = await this.securityAdapter.refreshToken({
           realm: sessionToken.tenant,
           token,
@@ -149,7 +149,7 @@ export class DefaultMultiTenantAdapter implements MultiTenantAdapter {
         }
         const token = await this.tenantCheckToken(req, res, sessionToken, enforcerFunc);
         return token;
-      } catch (e) {
+      } catch (e:any) {
         await sessionManager.deleteSession(sessionToken.jti);
                     // eslint-disable-next-line no-console
         console.log(`Error: ${e}`);

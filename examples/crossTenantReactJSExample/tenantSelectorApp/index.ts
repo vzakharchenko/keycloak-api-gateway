@@ -136,14 +136,14 @@ app.get('/', keycloak.protect(), keycloak.enforcer(['Tenant-List']), async (requ
         return clients.length > 0 &&
                     clients[0].clientAuthenticatorType === 'client-jwt' &&
                     (clients[0].clientId === request.query.app);
-      } catch (e) {
+      } catch (e:any) {
         throw new Error(e);
       }
     });
     renderUI(request, response, {
       tenants,
     });
-  } catch (e) {
+  } catch (e:any) {
     renderUI(request, response, {
       tenants: [{name: e}],
     });

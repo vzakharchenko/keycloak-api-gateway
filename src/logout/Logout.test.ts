@@ -133,7 +133,7 @@ describe('Logout tests', () => {
     let error = false;
     try {
       await logout.redirectDefaultLogout(request, response);
-    } catch (e) {
+    } catch (e:any) {
       error = true;
     }
     if (!error) {
@@ -184,7 +184,7 @@ describe('Logout tests', () => {
     let error = false;
     try {
       await logout.logout(request, response);
-    } catch (e) {
+    } catch (e:any) {
       error = true;
     }
     if (!error) {

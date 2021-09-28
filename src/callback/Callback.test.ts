@@ -125,7 +125,7 @@ describe('Callback tests', () => {
     try {
       await defaultCallback.callback(request, response);
       throw new Error("Wrong test");
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('sessionManager is not defined');
     }
   });

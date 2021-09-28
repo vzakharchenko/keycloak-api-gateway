@@ -120,7 +120,7 @@ describe('KeycloakUtils tests', () => {
     let error = false;
     try {
       await getCurrentStorage(handlerOptions);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('dynamoDbSettings setting does not defined');
       error = true;
     }
@@ -173,7 +173,7 @@ describe('KeycloakUtils tests', () => {
     let error = false;
     try {
       await getCurrentStorage(handlerOptions);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('test does not support');
       error = true;
     }

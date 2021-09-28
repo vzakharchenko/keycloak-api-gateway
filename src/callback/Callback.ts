@@ -86,7 +86,7 @@ export class DefaultCallback implements Callback {
       }
       res.cookie(getSessionName(this.options), sessionId);
       res.redirect(302, url);
-    } catch (e) {
+    } catch (e:any) {
             // eslint-disable-next-line no-console
       console.log(`error: ${e}`);
       res.redirect(302, `/error?message=${e.message}`);
