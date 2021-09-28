@@ -19,7 +19,7 @@ export class InMemoryDB implements StrorageDB {
   readStorage() {
     try {
       return fs.readFileSync(`${pathUtils.currentDir() || '.'}/storage.json`, 'utf8');
-    } catch (e) {
+    } catch (e:any) {
       if (e.code === 'ENOENT') {
         logger.log('Expected storage.json to be included in Lambda deployment package');
                 // fallthrough
@@ -46,7 +46,7 @@ export class InMemoryDB implements StrorageDB {
   saveStorage(storage: InMemoryType) {
     try {
       fs.writeFileSync(`${pathUtils.currentDir() || '.'}/storage.json`, JSON.stringify(storage), 'utf8');
-    } catch (e) {
+    } catch (e:any) {
       if (e.code === 'ENOENT') {
         logger.log('Expected storage.json to be included in Lambda deployment package');
                 // fallthrough

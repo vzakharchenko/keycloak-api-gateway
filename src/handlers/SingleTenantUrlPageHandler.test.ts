@@ -151,7 +151,7 @@ describe('SingleTenantUrlPageHandler tests', () => {
             throw new Error('next invoked');
           }
           , customPageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenantOptions does not defined');
       error = true;
     }
@@ -177,7 +177,7 @@ describe('SingleTenantUrlPageHandler tests', () => {
             throw new Error('next invoked');
           }
           , customPageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenantAdapter does not defined');
       error = true;
     }

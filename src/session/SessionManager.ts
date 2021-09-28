@@ -35,7 +35,7 @@ export function getSessionToken(sessionTokenString: string,
       ...decodeToken,
       ...(addTokenString ? {token: sessionTokenString} : {}),
     } as SessionToken : null;
-  } catch (e) {
+  } catch (e:any) {
         // eslint-disable-next-line no-console
     console.log(`error ${e}`);
     return null;

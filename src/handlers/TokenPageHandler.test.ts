@@ -201,7 +201,7 @@ describe('TokenPageHandler tests', () => {
           () => {
             next = true;
           }, clonePageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('sessionToken does not defined');
       error = true;
     }
@@ -236,7 +236,7 @@ describe('TokenPageHandler tests', () => {
           () => {
             next = true;
           }, clonePageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('multiTenantOptions does not defined');
       error = true;
     }
@@ -273,7 +273,7 @@ describe('TokenPageHandler tests', () => {
           () => {
             next = true;
           }, clonePageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('multiTenantOptions does not defined');
       error = true;
     }
@@ -319,7 +319,7 @@ describe('TokenPageHandler tests', () => {
           () => {
             next = true;
           }, clonePageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenantOptions does not defined');
       error = true;
     }
@@ -365,7 +365,7 @@ describe('TokenPageHandler tests', () => {
           () => {
             next = true;
           }, clonePageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('singleTenantAdapter does not defined');
       error = true;
     }

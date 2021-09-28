@@ -140,7 +140,7 @@ describe('TenantInternalPage tests', () => {
       await tenantInternalPage.execute(request, response, () => {
         next = true;
       }, customPageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       error = true;
       expect(e.message).toEqual("multiTenantOptions does not defined");
     }
@@ -164,7 +164,7 @@ describe('TenantInternalPage tests', () => {
       await tenantInternalPage.execute(request, response, () => {
         next = true;
       }, customPageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       error = true;
       expect(e.message).toEqual("multiTenantOptions does not defined");
     }

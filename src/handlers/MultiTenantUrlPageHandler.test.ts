@@ -162,7 +162,7 @@ describe('MultiTenantUrlPageHandler tests', () => {
                   throw new Error('next invoked');
                 }
                 , customPageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('multiTenantOptions does not defined');
       error = true;
     }
@@ -188,7 +188,7 @@ describe('MultiTenantUrlPageHandler tests', () => {
                   throw new Error('next invoked');
                 }
                 , customPageHandlerContext);
-    } catch (e) {
+    } catch (e:any) {
       expect(e.message).toEqual('multiTenantOptions does not defined');
       error = true;
     }

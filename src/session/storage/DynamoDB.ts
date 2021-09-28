@@ -40,7 +40,7 @@ export class DynamoDB implements StrorageDB {
           sessionId: {S: sessionId},
         },
       }).promise();
-    } catch (e) {
+    } catch (e:any) {
       logger.log(e);
     }
   }

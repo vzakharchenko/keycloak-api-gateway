@@ -117,7 +117,7 @@ export class DefaultLambdaEdgeAdapter implements LambdaEdgeAdapter {
       delete responseData.headers.via;
       delete responseData.headers.warning;
       return state ? event.Records[0].cf.request : responseData;
-    } catch (e) {
+    } catch (e:any) {
       // eslint-disable-next-line no-console
       console.log(`Error ${e.message}`);
       // eslint-disable-next-line no-console

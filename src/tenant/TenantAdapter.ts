@@ -57,7 +57,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
       try {
         await this.securityAdapter.validate(tok.token, enforcer);
         return token;
-      } catch (e) {
+      } catch (e:any) {
         const refreshContext:RefreshContext|null = await this.securityAdapter.refreshToken({request: req, token});
         if (refreshContext) {
           returnToken = refreshContext.token;
@@ -87,7 +87,7 @@ export class DefaultTenantAdapter implements TenantAdapter {
       const tok = await sessionManager.getSessionAccessToken(sessionToken);
       const token = await this.tenantCheckToken(req, res, sessionToken, tok, enforcer);
       return token;
-    } catch (e) {
+    } catch (e:any) {
       await sessionManager.deleteSession(sessionToken.jti);
             // eslint-disable-next-line no-console
       console.log(`Error: ${e}`);
