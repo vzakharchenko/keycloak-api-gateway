@@ -39,7 +39,7 @@ export default class App extends React.Component {
         jwt: accessToken,
         loading: false,
       });
-    } catch (e) {
+    } catch (e:any) {
       this.setState({
         loading: false,
         jwt: e.message,
