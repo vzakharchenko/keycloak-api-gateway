@@ -30,6 +30,7 @@
     "keycloak-connect": "*",
     "keycloak-lambda-authorizer": "*",
     "express-session": "*",
-    "path": "*"
+    "path": "*",
+    "hbs": "*"
   }
 }

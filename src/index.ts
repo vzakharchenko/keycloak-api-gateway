@@ -13,7 +13,6 @@ import {ServiceAccount} from "keycloak-lambda-authorizer/dist/src/serviceaccount
 import {SecurityAdapter} from "keycloak-lambda-authorizer/dist/src/adapters/SecurityAdapter";
 import {ResourceChecker} from "keycloak-lambda-authorizer/dist/src/enforcer/resource/Resource";
 
-
 import {PageHandlers} from "./handlers/PageHandler";
 import {Callback} from "./callback/Callback";
 import {Logout} from "./logout/Logout";
@@ -91,6 +90,7 @@ export type RequestObject = {
     url?: string,
     querystring?: string,
     signedCookies?:any,
+    body?:any,
     cookies: CookieType,
     query: QueryType,
     headers: HeadersType,
@@ -113,5 +113,22 @@ export type Options = {
     jwks?: UrlJWKS;
     defaultAuthorization?: EnforcerFunction;
     callback?: Callback;
+}
+
+export type HTTPMethod =
+    | 'get' | 'GET'
+    | 'delete' | 'DELETE'
+    | 'head' | 'HEAD'
+    | 'options' | 'OPTIONS'
+    | 'post' | 'POST'
+    | 'put' | 'PUT'
+    | 'patch' | 'PATCH'
+    | 'purge' | 'PURGE'
+    | 'link' | 'LINK'
+    | 'unlink' | 'UNLINK'
+
+export type ProxyOptions = {
+    url:string,
+    method: HTTPMethod
 }
 
