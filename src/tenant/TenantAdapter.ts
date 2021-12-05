@@ -33,7 +33,7 @@ export interface TenantAdapter {
 
 export class DefaultTenantAdapter implements TenantAdapter {
   options: Options;
-  securityAdapter:SecurityAdapter|null=null;
+  securityAdapter:SecurityAdapter|null = null;
 
   constructor(options: Options) {
     this.options = options;
@@ -113,9 +113,9 @@ export class DefaultTenantAdapter implements TenantAdapter {
       url: '/',
       tenant: keycloakJson.realm,
     };
-    // eslint-disable-next-line babel/camelcase
+
     const kc_idp_hint = req.query.kc_idp_hint || this.options.singleTenantOptions.idp;
-    // eslint-disable-next-line babel/camelcase
+
     res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${keycloakJson.realm}/protocol/openid-connect/auth?client_id=${keycloakJson.resource}&redirect_uri=${getCurrentHost(req)}/callbacks/${keycloakJson.realm}/${keycloakJson.resource}/callback&state=${encodeURIComponent(JSON.stringify(keycloakState))}&response_type=code&nonce=1&scope=openid${kc_idp_hint ? `&kc_idp_hint=${kc_idp_hint}` : ''}`);
   }
 

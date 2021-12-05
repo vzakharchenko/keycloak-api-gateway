@@ -40,9 +40,9 @@ export class DefaultLogout implements Logout {
 
   async redirectTenantLogout(req:RequestObject, res:ResponseObject, tenantName:string, redirectUrl?: string) {
     const keycloakJson = await this.options.multiTenantOptions?.multiTenantJson(tenantName);
-    // eslint-disable-next-line babel/camelcase
+
     const kc_idp_hint = req.query.kc_idp_hint || this.options.multiTenantOptions?.idp;
-    // eslint-disable-next-line babel/camelcase
+
     const tenantHint = kc_idp_hint ? `&kc_idp_hint=${kc_idp_hint}` : '';
     res.redirect(302, `${getKeycloakUrl(keycloakJson)}/realms/${tenantName}/protocol/openid-connect/logout?redirect_uri=${redirectUrl || `${getCurrentHost(req)}/tenants/${tenantName}`}${tenantHint}`);
   }
