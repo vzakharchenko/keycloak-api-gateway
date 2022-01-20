@@ -14,6 +14,7 @@ type InMemoryType = {
 
 
 export class InMemoryDB implements StrorageDB {
+  // eslint-disable-next-line babel/no-invalid-this
   private inMemory: InMemoryType = this.updateStorage();
 
   readStorage() {
