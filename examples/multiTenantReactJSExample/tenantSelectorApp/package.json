@@ -28,6 +28,7 @@
     "express-handlebars": "*",
     "jsonwebtoken": "*",
     "path": "*",
-    "keycloak-lambda-authorizer": "*"
+    "keycloak-lambda-authorizer": "*",
+    "hbs": "*"
   }
 }

@@ -4,7 +4,7 @@ import path from 'path';
 import session from 'express-session';
 import Keycloak from 'keycloak-connect';
 import express from 'express';
-import exphbs from 'express-handlebars';
+import {engine} from 'express-handlebars';
 import bodyParser from 'body-parser';
 import KeycloakAdapter from 'keycloak-lambda-authorizer/dist/Adapter';
 import {getKeycloakUrl, getUrl} from 'keycloak-lambda-authorizer/dist/src/utils/KeycloakUtils';
@@ -38,7 +38,7 @@ app.use(keycloak.middleware({
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.engine('.hbs', exphbs({
+app.engine('.hbs', engine({
   defaultLayout: 'main',
   extname: '.hbs',
   layoutsDir: path.join(__dirname, 'views/layouts'),

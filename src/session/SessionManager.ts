@@ -15,7 +15,7 @@ export type SessionToken = {
     email: string,
     exp: number,
     multiFlag: boolean,
-    // eslint-disable-next-line babel/camelcase
+
     session_state: string,
     sessionState: string,
     tenant?: string,

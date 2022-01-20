@@ -52,7 +52,7 @@ const behaviorContext: BehaviorContext = {
     email: 'email',
     exp: 1,
     multiFlag: false,
-        // eslint-disable-next-line babel/camelcase
+
     session_state: 'session_state',
     sessionState: 'sessionState',
     tenant: 'tenant',

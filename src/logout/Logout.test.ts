@@ -1,4 +1,4 @@
-/* eslint-disable no-empty-function, babel/camelcase, @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
+/* eslint-disable no-empty-function, , @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
 */
 
 import 'jest';

@@ -53,7 +53,7 @@ const behaviorContext: BehaviorContext = {
     email: 'email',
     exp: 1,
     multiFlag: true,
-    // eslint-disable-next-line babel/camelcase
+
     session_state: 'session_state',
     sessionState: 'sessionState',
     tenant: 'tenant',
@@ -113,7 +113,7 @@ describe('TokenPageHandler tests', () => {
         email: 'email',
         exp: 1,
         multiFlag: false,
-        // eslint-disable-next-line babel/camelcase
+
         session_state: 'session_state',
         sessionState: 'sessionState',
         tenant: 'tenant',
@@ -157,7 +157,7 @@ describe('TokenPageHandler tests', () => {
         email: 'email',
         exp: 1,
         multiFlag: false,
-        // eslint-disable-next-line babel/camelcase
+
         session_state: 'session_state',
         sessionState: 'sessionState',
         tenant: 'tenant',
@@ -300,7 +300,7 @@ describe('TokenPageHandler tests', () => {
         email: 'email',
         exp: 1,
         multiFlag: false,
-        // eslint-disable-next-line babel/camelcase
+
         session_state: 'session_state',
         sessionState: 'sessionState',
         tenant: 'tenant',
@@ -346,7 +346,7 @@ describe('TokenPageHandler tests', () => {
         email: 'email',
         exp: 1,
         multiFlag: false,
-        // eslint-disable-next-line babel/camelcase
+
         session_state: 'session_state',
         sessionState: 'sessionState',
         tenant: 'tenant',

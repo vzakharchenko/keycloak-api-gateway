@@ -11,7 +11,7 @@ export async function fetchData(url:string, method:Method = 'GET', headers?:any)
     withCredentials: true,
     timeout: 29000,
   });
-  return ret.data;
+  return ret;
 }
 
 export async function sendData(url:string, method:Method = 'POST', data:string, headers?:any) {
@@ -24,5 +24,5 @@ export async function sendData(url:string, method:Method = 'POST', data:string, 
     withCredentials: true,
     timeout: 29000,
   });
-  return ret.data;
+  return ret;
 }
