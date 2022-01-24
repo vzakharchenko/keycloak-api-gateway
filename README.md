@@ -8,8 +8,6 @@
 - [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=vzakharchenko_keycloak-api-gateway&metric=sqale_index)](https://sonarcloud.io/dashboard?id=vzakharchenko_keycloak-api-gateway)
 - [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=vzakharchenko_keycloak-api-gateway&metric=bugs)](https://sonarcloud.io/dashboard?id=vzakharchenko_keycloak-api-gateway)
 
-- [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://secure.wayforpay.com/button/b95af1a9b9ed3)
-
 Login flow gateway through [Keycloak](https://www.keycloak.org/) for static Web resources(bundle.js, images, pdf etc...)
 
 ## Features
